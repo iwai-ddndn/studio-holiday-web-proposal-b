@@ -12,7 +12,7 @@
 .pb-sub main { position: relative; }
 
 /* ---------- ヒーロー: ライムのハーフトーンの面にステッカー見出し。スクロールで奥に沈む ---------- */
-.pb-hero-stage--sub { height: auto; min-height: 0; }
+.pb-hero-stage--sub { height: auto; min-height: 0; background: var(--white); } /* 縮んだ時の周りは白（黒だと暗く見える） */
 .pb-sub .page-hero {
   position: relative;
   height: clamp(460px, 78vh, 780px);
@@ -74,6 +74,8 @@
 }
 @keyframes pbScrollLine { from { background-position: 0 100%; } to { background-position: 0 -100%; } }
 
+/* 下層はヒーローが明るいライムなので、重なってくる本文シートの影は薄く（濃いとヒーローの下端が暗く見える） */
+.pb-sub .pb-sheet { box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.06); }
 /* 詳細ページなどヒーローを持たないページは、本文シートの角丸・影なし */
 .pb-sheet--flat { border-radius: 0; box-shadow: none; }
 

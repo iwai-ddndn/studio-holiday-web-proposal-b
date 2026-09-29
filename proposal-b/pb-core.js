@@ -118,11 +118,16 @@
   onScroll();
 
   /* ---------- ヒーロー: 本文が上に重なってくる間、奥に沈む ---------- */
-  PB.stageSink = (stage, sheet, target = stage.firstElementChild) => {
+  // opts.dim … 沈みきった時の暗さ（0で暗くしない） / opts.scale … 沈みきった時の縮尺
+  PB.stageSink = (stage, sheet, target = stage.firstElementChild, opts = {}) => {
     if (!stage || !sheet) return;
-    gsap.timeline({ scrollTrigger: { trigger: sheet, start: 'top bottom', end: 'top top', scrub: true } })
-      .to(target, { scale: 0.88, borderRadius: 48, ease: 'none' }, 0)
-      .fromTo(stage, { '--dim': 0 }, { '--dim': 0.6, ease: 'none' }, 0);
+    const { dim = 0.6, scale = 0.88 } = opts;
+    // 開始は「本文シートが最初に見えている位置」から。ヒーローが画面より低いページでも、
+    // 読み込み直後（スクロール0）は必ず沈む前の明るい状態から始まる
+    const start = () => `top ${Math.min(innerHeight, sheet.getBoundingClientRect().top + scrollY)}px`;
+    const tl = gsap.timeline({ scrollTrigger: { trigger: sheet, start, end: 'top top', scrub: true, invalidateOnRefresh: true } })
+      .to(target, { scale, borderRadius: 48, ease: 'none' }, 0);
+    if (dim) tl.fromTo(stage, { '--dim': 0 }, { '--dim': dim, ease: 'none' }, 0);
     ScrollTrigger.create({
       trigger: sheet,
       start: 'top top-=2',

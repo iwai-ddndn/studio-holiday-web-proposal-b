@@ -39,7 +39,7 @@
      ========================================================== */
   const hero = $('.page-hero');
   if (hero) {
-    PB.stageSink($('.pb-hero-stage'), $('.pb-sheet'), hero);
+    PB.stageSink($('.pb-hero-stage'), $('.pb-sheet'), hero, { dim: 0, scale: 0.94 });
     const head = $('.sticker-head', hero);
     paste(head);
 
