@@ -1,0 +1,98 @@
+[
+  {
+    "slug": "hirochika-horiuchi",
+    "name": "Hirochika Horiuchi",
+    "name_ja": "堀内弘誓",
+    "role": "代表取締役CEO",
+    "tags": ["代表取締役CEO", "デザインコンサルティング"],
+    "image": "./assets/members/horiuchi.jpg",
+    "tilt": -6.16,
+    "label": "l",
+    "bio": [
+      "株式会社スタジオホリデイ 代表取締役CEO。（仮）",
+      "ブランド・組織・事業のデザインを横断し、設計から実装・運用までを伴走する。プロフィール本文は入稿待ちです。（仮）"
+    ]
+  },
+  {
+    "slug": "jun-ebata",
+    "name": "Jun Ebata",
+    "name_ja": "",
+    "role": "",
+    "tags": ["役職（仮）"],
+    "image": "./assets/members/ebata.jpg",
+    "tilt": 3.76,
+    "label": "s",
+    "bio": ["プロフィール本文は入稿待ちです。（仮）"]
+  },
+  {
+    "slug": "yuta-yasutake",
+    "name": "Yuta Yasutake",
+    "name_ja": "",
+    "role": "",
+    "tags": ["役職（仮）"],
+    "image": "./assets/members/yasutake.jpg",
+    "tilt": -1.79,
+    "label": "m",
+    "bio": ["プロフィール本文は入稿待ちです。（仮）"]
+  },
+  {
+    "slug": "sample-hanako-yamada",
+    "sample": true,
+    "name": "Hanako Yamada",
+    "name_ja": "山田花子",
+    "tags": ["デザイナー（仮）"],
+    "image": "./assets/stickers/holiday-kun-thinking.png",
+    "bg": "#e9f5b8",
+    "tilt": 4.2,
+    "label": "r",
+    "bio": ["レイアウト確認用のサンプルメンバーです。（仮）"]
+  },
+  {
+    "slug": "sample-taro-suzuki",
+    "sample": true,
+    "name": "Taro Suzuki",
+    "name_ja": "鈴木太郎",
+    "tags": ["エンジニア（仮）"],
+    "image": "./assets/stickers/works/monster-illustration.png",
+    "bg": "#cfe7ff",
+    "tilt": -4.5,
+    "label": "l",
+    "bio": ["レイアウト確認用のサンプルメンバーです。（仮）"]
+  },
+  {
+    "slug": "sample-aoi-tanaka",
+    "sample": true,
+    "name": "Aoi Tanaka",
+    "name_ja": "田中あおい",
+    "tags": ["プランナー（仮）"],
+    "image": "./assets/stickers/works/holiday-cola.png",
+    "bg": "#ffe1ec",
+    "tilt": 2.4,
+    "label": "m",
+    "bio": ["レイアウト確認用のサンプルメンバーです。（仮）"]
+  },
+  {
+    "slug": "sample-ken-sato",
+    "sample": true,
+    "name": "Ken Sato",
+    "name_ja": "佐藤健",
+    "tags": ["フードディレクター（仮）"],
+    "image": "./assets/stickers/works/goichi-character.png",
+    "bg": "#fff0c2",
+    "tilt": -2.8,
+    "label": "s",
+    "bio": ["レイアウト確認用のサンプルメンバーです。（仮）"]
+  },
+  {
+    "slug": "sample-mio-kobayashi",
+    "sample": true,
+    "name": "Mio Kobayashi",
+    "name_ja": "小林美緒",
+    "tags": ["コミュニティマネージャー（仮）"],
+    "image": "./assets/stickers/works/ebisun.png",
+    "bg": "#e6e0ff",
+    "tilt": 5.1,
+    "label": "r",
+    "bio": ["レイアウト確認用のサンプルメンバーです。（仮）"]
+  }
+]

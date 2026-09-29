@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<!-- ▼ デザイン案B: scripts/build_proposal_b.py が本番ページ（work.html）から生成。手で編集しないこと -->
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" /><!-- 確認用サイトのため検索除け -->
+  <title>WORKs — STUDIO HOLIDAY（デザイン案B）</title>
+  <script>
+    // 旧URL（work.html?id=…）から恒久URL（works/<slug>/）への互換リダイレクト。
+    // data/works-fallback.json で id/slug → slug を解決できた場合のみ遷移し、
+    // 解決できない場合（新規事例などフォールバックに無いID）は従来どおりこのページでJS描画する。
+    (function () {
+      var id = new URLSearchParams(location.search).get('id');
+      if (!id) return;
+      fetch('../data/works-fallback.json')
+        .then(function (res) { return res.ok ? res.json() : null; })
+        .then(function (works) {
+          if (!Array.isArray(works)) return;
+          var hit = works.find(function (w) { return w && (w.slug === id || w.id === id); });
+          if (!hit || !hit.slug) return; // CMSのコンテンツID等 → site.js側が解決してリダイレクトする
+          var url = './works/' + encodeURIComponent(hit.slug) + '/';
+          // 静的ページが実在する時だけ遷移（未生成の新規事例は404にせずJS描画に任せる）
+          fetch(url, { method: 'HEAD' }).then(function (res) {
+            if (res.ok) location.replace(url);
+          });
+        })
+        .catch(function () { /* file:// 直開き等。JS描画にフォールバック */ });
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&amp;family=Noto+Sans+JP:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css?v=20260926-1" />
+  <link rel="stylesheet" href="../proposal-b/pb.css?v=20260929-2" />
+  <link rel="stylesheet" href="../proposal-b/pb-sub.css?v=20260929-2" />
+  <script>document.documentElement.classList.add("pb-js");</script>
+</head>
+<body class="work-page pb pb-sub">
+  <!-- ページ遷移の幕（入ってきた時は上に抜け、リンクを押すと下からかぶさる） -->
+  <div class="pb-curtain is-cover" aria-hidden="true"><span class="pb-curtain-mark"></span></div>
+  <div class="pb-cursor" aria-hidden="true"><span class="pb-cursor-label"></span></div>
+  <div class="pb-progress" aria-hidden="true"><i></i></div>
+
+  <!-- 事例の詳細ページ（旧URL互換）。恒久URLは works/<slug>/（静的生成）。
+       ?id=<microCMSのコンテンツID or ローカルのslug> で来た場合は上のスクリプトが
+       works/<slug>/ へリダイレクトし、解決できない事例だけここでJS描画する。
+       中身は site.js が microCMS（works）から描画（title / kind / client / description / body）。
+       ヘッダー・フッターはTOPと共通コンポーネント。 -->
+  <header class="site-header">
+    <div class="header-pill">
+      <a class="brand" href="../index-b.html">
+        <span class="brand-logo"><img src="../assets/header-logo.png" alt="" aria-hidden="true" /></span>
+        <span>STUDIO&nbsp;HOLIDAY</span>
+      </a>
+      <button class="nav-toggle" type="button" aria-label="メニューを開く" aria-expanded="false" aria-controls="siteNav">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="site-nav" id="siteNav">
+        <a href="../index-b.html"><span class="pb-roll"><span>TOP</span></span></a>
+        <a href="../index-b.html#about"><span class="pb-roll"><span>ABOUT</span></span></a>
+        <a href="../index-b.html#business"><span class="pb-roll"><span>BUSINESS</span></span></a>
+        <a href="./works/"><span class="pb-roll"><span>WORKs</span></span></a>
+        <a href="./members/"><span class="pb-roll"><span>MEMBERS</span></span></a>
+        <a href="../index-b.html#company"><span class="pb-roll"><span>COMPANY</span></span></a>
+        <a class="nav-contact" href="#contact">お問い合わせ</a><!-- スマホのメニュー内のみ表示 -->
+      </nav>
+    </div>
+    <a class="header-contact" href="#contact"><span class="pb-roll"><span>お問い合わせ</span></span></a>
+  </header>
+
+  <main><div class="pb-sheet pb-sheet--flat">
+    <article class="work-detail" data-work-detail>
+      <!-- site.js が事例の内容を差し込む -->
+      <p class="work-note">読み込み中…</p>
+    </article>
+
+    <!-- 関連する事例（自分自身は除外し、同じジャンルを先頭に寄せる） -->
+    <section class="sec-works-other">
+      <div class="sec-label"><span>RELATED WORKs</span><i></i><span></span></div>
+      <div class="works-grid" data-works-grid data-works-limit="4"></div>
+    </section>
+
+    <section class="sec-contact" id="contact">
+      <div class="sec-label"><span>CONTACT</span><i></i><span></span></div>
+      <p class="contact-lead">STUDIO HOLIDAY デザインコンサルティングチームへのお問い合わせ、協業・パートナー連携のご相談は下記フォームからご連絡ください。</p>
+      <a class="btn-lime btn-lime--wide" href="#" onclick="return false"><span>フォームを開く</span><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg></a><!-- フォームURL未定（仮） -->
+    </section>
+  </div></main>
+
+  <footer class="pb-footer">
+    <div class="pb-footer-main">
+      <div class="pb-footer-left">
+        <img class="pb-footer-logo" src="../assets/footer-logo.png" alt="STUDIO HOLIDAY" />
+        <div class="pb-footer-addr">
+          <p>株式会社スタジオホリデイ</p>
+          <p>〒169-0073 東京都新宿区百人町1丁目10−15　JR新大久保駅ビル4F K,D,C,,,</p>
+          <a class="pb-footer-contact" data-magnet href="#contact">CONTACT</a>
+        </div>
+      </div>
+      <nav class="pb-footer-nav">
+        <div class="fnav-col">
+          <a class="fnav-head" href="../index-b.html">TOP</a>
+          <div class="fnav-sub">
+            <a href="../index-b.html#about">ABOUT</a>
+            <a href="../index-b.html#business">BUSINESS</a>
+            <a href="../index-b.html#works">WORKs</a>
+            <a href="../index-b.html#members">MEMBERS</a>
+            <a href="../index-b.html#company">COMPANY</a>
+            <a href="../index-b.html#contact">CONTACT</a>
+          </div>
+        </div>
+        <div class="fnav-col">
+          <a class="fnav-head" href="../index-b.html#business">BUSINESS</a>
+          <div class="fnav-sub">
+            <a href="./design-process.html">DESIGN PROCESS</a>
+            <a href="./food-design.html">FOOD DESIGN</a>
+            <a href="./community-space.html">COMMUNITY &amp; SPACE</a>
+          </div>
+        </div>
+        <div class="fnav-col">
+          <a class="fnav-head" href="./works/">WORKs</a>
+          <div class="fnav-sub" data-footer-works><!-- 先頭5件の事例ページ -->
+            <a href="./works/sushiro/">スシロー</a>
+            <a href="./works/pondelion/">ポン・デ・ライオン</a>
+            <a href="./works/yappy/">yappy</a>
+            <a href="./works/holiday-cola-ginger-apple/">休日コーラ GINGER APPLE</a>
+            <a href="./works/itomaki-ac-adapter/">itomaki AC Adapter</a>
+          </div>
+        </div>
+        <div class="fnav-col">
+          <a class="fnav-head" href="./members/">MEMBERS</a>
+        </div>
+        <div class="fnav-col">
+          <a class="fnav-ext" href="https://kdc-foodlab.com/" target="_blank" rel="noopener">K,D,C,,,<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>
+          <a class="fnav-ext" href="https://lab.studioholiday.jp/" target="_blank" rel="noopener">休日コーラ<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>
+          <a class="fnav-ext" href="https://substack.studioholiday.jp/" target="_blank" rel="noopener">Newsletter<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>
+        </div>
+      </nav>
+    </div>
+    <div class="pb-footer-mark" aria-hidden="true"></div>
+    <div class="pb-footer-bottom">
+      <p>© STUDIO HOLIDAY ALL RIGHT RESERVED</p>
+      <a class="pb-totop" href="#" data-magnet aria-label="ページの先頭へ">↑</a>
+    </div>
+  </footer>
+
+  <script src="../cms-config.js?v=20260816-4"></script>
+  <script src="../site.js?v=20260926-1"></script>
+  <script src="../proposal-b/pb-links.js?v=20260929-2" data-broot="./"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+  <script src="../proposal-b/pb-core.js?v=20260929-2"></script>
+  <script src="../proposal-b/pb-sub.js?v=20260929-2"></script>
+</body>
+</html>

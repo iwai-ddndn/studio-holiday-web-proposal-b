@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" /><!-- 確認用サイトのため検索除け -->
+  <title>STUDIO HOLIDAY — キャラクター & グラフィック（デザイン案B）</title>
+  <!-- ▼ デザイン案B（モーション強化版）。本番の index.html は触らずに別案として持つ。
+       要素・文言・画像・カラーは index.html と同じ。FV（壁）・ドロワー・事例カード・ニュースレターは
+       既存の main.js / site.js をそのまま使い、見た目と動きだけ proposal-b/ で上書きする -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&amp;family=Noto+Sans+JP:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css?v=20260926-1" />
+  <link rel="stylesheet" href="./proposal-b/pb.css?v=20260929-2" />
+  <script>document.documentElement.classList.add("pb-js");</script>
+</head>
+<body class="home-page pb">
+  <!-- オープニング: インクの幕 → ライムの幕が上に抜けて、壁のイントロが始まる -->
+  <div class="pb-loader" aria-hidden="true">
+    <div class="pb-loader-lime"></div>
+    <div class="pb-loader-ink">
+      <div class="pb-loader-inner">
+        <img class="pb-loader-catch" src="./assets/fv-catchcopy.png" alt="" />
+        <div class="pb-loader-bar"><i></i></div>
+        <span class="pb-loader-count">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ページ遷移の幕（下層ページへ移る時に下からかぶさる） -->
+  <div class="pb-curtain" aria-hidden="true"><span class="pb-curtain-mark"></span></div>
+
+  <!-- マウス追従カーソル（PCのみ）。壁の上では DRAG、カードの上では VIEW を出す -->
+  <div class="pb-cursor" aria-hidden="true"><span class="pb-cursor-label"></span></div>
+  <div class="pb-progress" aria-hidden="true"><i></i></div>
+
+  <header class="site-header">
+    <div class="header-pill">
+      <a class="brand" href="#">
+        <span class="brand-logo"><img src="./assets/header-logo.png" alt="" aria-hidden="true" /></span>
+        <span>STUDIO&nbsp;HOLIDAY</span>
+      </a>
+      <button class="nav-toggle" type="button" aria-label="メニューを開く" aria-expanded="false" aria-controls="siteNav">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="site-nav" id="siteNav">
+        <a href="#"><span class="pb-roll"><span>TOP</span></span></a>
+        <a href="#about"><span class="pb-roll"><span>ABOUT</span></span></a>
+        <a href="#business"><span class="pb-roll"><span>BUSINESS</span></span></a>
+        <a href="./b/works/"><span class="pb-roll"><span>WORKs</span></span></a>
+        <a href="./b/members/"><span class="pb-roll"><span>MEMBERS</span></span></a>
+        <a href="#company"><span class="pb-roll"><span>COMPANY</span></span></a>
+        <a class="nav-contact" href="#contact">お問い合わせ</a><!-- スマホのメニュー内のみ表示 -->
+      </nav>
+    </div>
+    <a class="header-contact" href="#contact"><span class="pb-roll"><span>お問い合わせ</span></span></a>
+  </header>
+
+  <main>
+    <!-- FV: 壁はスクロールで奥に沈み（縮小＋角丸）、本編がその上に重なってくる -->
+    <div class="pb-hero-stage">
+      <section class="hero is-intro" id="hero">
+        <div class="news-ticker">
+          <span class="ticker-label"><img src="./assets/newsletter-icon.svg" alt="" aria-hidden="true" />Newsletter</span>
+          <!-- 記事一覧はSubstackのRSSからJSが自動取得して差し替える（フィード取得失敗時のフォールバック） -->
+          <div class="ticker-window" aria-label="ニュースレターの新着">
+            <span class="ticker-track">
+              <span class="ticker-set">
+                <a href="https://substack.studioholiday.jp/" target="_blank" rel="noopener">vol.48 偶発的な出会いがプロジェクトになるまで（仮）</a>
+                <a href="https://substack.studioholiday.jp/" target="_blank" rel="noopener">vol.47 休日コーラ、次の一手（仮）</a>
+                <a href="https://substack.studioholiday.jp/" target="_blank" rel="noopener">vol.46 KDCに集まる人たちの話（仮）</a>
+                <a href="https://substack.studioholiday.jp/" target="_blank" rel="noopener">vol.45 「デザイン&amp;デプロイ」という仕事（仮）</a>
+              </span>
+              <span class="ticker-set" aria-hidden="true">
+                <a href="https://substack.studioholiday.jp/" target="_blank" rel="noopener" tabindex="-1">vol.48 偶発的な出会いがプロジェクトになるまで（仮）</a>
+                <a href="https://substack.studioholiday.jp/" target="_blank" rel="noopener" tabindex="-1">vol.47 休日コーラ、次の一手（仮）</a>
+                <a href="https://substack.studioholiday.jp/" target="_blank" rel="noopener" tabindex="-1">vol.46 KDCに集まる人たちの話（仮）</a>
+                <a href="https://substack.studioholiday.jp/" target="_blank" rel="noopener" tabindex="-1">vol.45 「デザイン&amp;デプロイ」という仕事（仮）</a>
+              </span>
+            </span>
+          </div>
+          <a class="ticker-cta" href="https://substack.studioholiday.jp/" target="_blank" rel="noopener"><span>購読する</span><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>
+        </div>
+
+        <div class="world" id="world" aria-label="スタジオホリデーのアウトプットの壁">
+          <div class="world-center" aria-hidden="true">
+            <img class="fv-catch" src="./assets/fv-catchcopy.png" alt="なんかこんなんやりたい、をカタチに。" />
+            <img class="fv-logo" src="./assets/fv-logo.svg" alt="STUDIO HOLIDAY" />
+          </div>
+          <!-- ステッカー・写真は main.js がここに貼っていく -->
+        </div>
+        <p class="drag-hint" aria-hidden="true">Drag &amp; Explore!</p>
+        <a class="scroll-cta" href="#about"><span>Go to CONTENTS</span><em aria-hidden="true">↓</em></a>
+
+        <!-- 右下の回転バッジ: 押すと本編へ -->
+        <a class="pb-scroll-badge" href="#about" aria-label="本編へスクロール">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <defs><path id="pbBadgeCircle" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0" /></defs>
+            <text><textPath href="#pbBadgeCircle">SCROLL TO CONTENTS ✦ STUDIO HOLIDAY ✦ </textPath></text>
+          </svg>
+          <span class="pb-scroll-badge-arrow">↓</span>
+        </a>
+      </section>
+    </div>
+
+    <!-- ここから下は FV の上に重なってくる「本編」 -->
+    <div class="pb-sheet">
+
+      <!-- 斜めに交差するマーキー帯（スクロールの速さで流れが加速・傾く） -->
+      <div class="pb-bands" aria-hidden="true">
+        <div class="pb-band pb-band--lime" data-marquee="1">
+          <div class="pb-band-track">
+            <span>なんかこんなんやりたい、をカタチに。</span><b>✦</b><span>DESIGN CONSULTING</span><b>✦</b><span>FOOD DESIGN</span><b>✦</b><span>COMMUNITY＆SPACE</span><b>✦</b>
+          </div>
+        </div>
+        <div class="pb-band pb-band--ink" data-marquee="-1">
+          <div class="pb-band-track">
+            <span>STUDIO HOLIDAY</span><b>●</b><span>ABOUT</span><b>●</b><span>BUSINESS</span><b>●</b><span>WORKs</span><b>●</b><span>MEMBERS</span><b>●</b><span>COMPANY</span><b>●</b>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABOUT -->
+      <section class="pb-about" id="about">
+        <!-- まわりに漂うステッカー（スクロールで別々の速さで動く） -->
+        <div class="pb-floaters" aria-hidden="true">
+          <img class="pb-floater" data-speed="-0.35" style="--x:6%;--y:14%;--w:150px;--r:-10deg" src="./assets/stickers/holiday-kun-thinking.png" alt="" />
+          <img class="pb-floater" data-speed="0.25" style="--x:84%;--y:8%;--w:130px;--r:12deg" src="./assets/stickers/works/holiday-cola.png" alt="" />
+          <img class="pb-floater" data-speed="-0.2" style="--x:88%;--y:66%;--w:150px;--r:-6deg" src="./assets/stickers/works/monster-illustration.png" alt="" />
+          <img class="pb-floater" data-speed="0.4" style="--x:4%;--y:72%;--w:120px;--r:8deg" src="./assets/stickers/works/ebisun.png" alt="" />
+          <img class="pb-floater" data-speed="-0.5" style="--x:72%;--y:88%;--w:100px;--r:-14deg" src="./assets/stickers/works/goichi-character.png" alt="" />
+        </div>
+
+        <div class="pb-about-inner">
+          <h2 class="pb-sticker pb-sticker--about" data-paste><img src="./assets/headings/about.png" alt="ABOUT" width="439" height="145" /></h2>
+          <h1 class="pb-about-title" data-split>なんかこんなんやりたい、<br class="pb-br-sp" />を<span class="pb-mark">カタチに</span>。</h1>
+          <!-- 本文は1行ずつ、スクロールに合わせて墨が乗っていく -->
+          <p class="pb-about-text" data-lines>
+            <span>思いついたはいいものの、二の足を踏んでしまうアイデア。</span>
+            <span>やりたいことはあるけれど、どこから手をつけるか迷うプロジェクト。</span>
+            <span>そんな「なんかこんなんやりたい」は、STUDIO HOLIDAYにお任せを。</span>
+            <span>ブランドのデザインも、組織のデザインも、体験のデザインも、</span>
+            <span>設計だけでは動かない。実装だけでは効かない。だから僕たちは、両方やる。</span>
+            <span>STUDIO HOLIDAYは、経営や事業のアイデアを形にし、</span>
+            <span>育てるまでを伴走するデザインチームです。</span>
+          </p>
+        </div>
+      </section>
+
+      <!-- BUSINESS: 左にぶら下がるタグ（スクロールで揺れる）、右にカードが1枚ずつ積み重なる -->
+      <section class="pb-business" id="business">
+        <div class="pb-biz-layout">
+          <div class="pb-biz-side">
+            <h2 class="pb-sticker pb-sticker--business" data-swing><img src="./assets/headings/business.png" alt="BUSINESS" width="208" height="362" /></h2>
+            <p class="pb-biz-counter" aria-hidden="true"><b class="pb-biz-now">01</b><span>/ 03</span></p>
+          </div>
+          <div class="pb-biz-stack">
+            <a class="pb-biz-card" href="./b/design-process.html" style="--i:0">
+              <span class="pb-biz-visual"><img src="./assets/business-consulting-collage.jpg" alt="スタホリのアウトプットのコラージュ" /></span>
+              <span class="pb-biz-body">
+                <span class="pb-biz-no">01</span>
+                <strong>DESIGN CONSULTING</strong>
+                <span class="pb-biz-text">キャラクターデザイン、アウターブランディングやインナーブランディング、組織開発支援まで。つくって終わりにせず、その先の実装と「効かせる」までをやり切ります。</span>
+                <span class="pb-arrow" data-magnet aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg></span>
+              </span>
+            </a>
+            <a class="pb-biz-card" href="./b/food-design.html" style="--i:1">
+              <span class="pb-biz-visual"><img src="./assets/business-food-cola.png" alt="休日コーラ ジンジャーアップル" /></span>
+              <span class="pb-biz-body">
+                <span class="pb-biz-no">02</span>
+                <strong>FOOD DESIGN</strong>
+                <span class="pb-biz-text">フードレシピ開発から、フードや飲食事業のブランディングまで。STUDIO HOLIDAYオリジナルのクラフトコーラも製造・販売しています。</span>
+                <span class="pb-arrow" data-magnet aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg></span>
+              </span>
+            </a>
+            <a class="pb-biz-card" href="./b/community-space.html" style="--i:2">
+              <span class="pb-biz-visual"><img src="./assets/business-space.png" alt="コワーキングスペース K,D,C,,, でのイベント" /></span>
+              <span class="pb-biz-body">
+                <span class="pb-biz-no">03</span>
+                <strong>COMMUNITY＆SPACE</strong>
+                <span class="pb-biz-text">新大久保駅直結のコワーキングスペース「K,D,C,,,」を運営。STUDIO HOLIDAYが目指す多様な個性が集まる「学際メッシュネットワーク」の拠点になっています。</span>
+                <span class="pb-arrow" data-magnet aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg></span>
+              </span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONTACT: 黒地に大きなマーキー。ボタンはカーソルに吸い付く -->
+      <section class="pb-contact" id="contact">
+        <div class="pb-contact-marquee" aria-hidden="true" data-marquee="1">
+          <div class="pb-band-track"><span>CONTACT</span><b>✦</b><span>CONTACT</span><b>✦</b><span>CONTACT</span><b>✦</b></div>
+        </div>
+        <div class="pb-contact-inner">
+          <h2 class="pb-sticker pb-sticker--contact" data-paste><img src="./assets/headings/contact.png" alt="CONTACT" width="357" height="207" /></h2>
+          <p class="pb-contact-lead" data-fade>STUDIO HOLIDAY デザインコンサルティングチームへのお問い合わせ、協業・パートナー連携のご相談は下記フォームからご連絡ください。</p>
+          <a class="pb-btn" href="#" onclick="return false" data-magnet><span class="pb-btn-fill" aria-hidden="true"></span><span class="pb-btn-label">フォームを開く</span><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg></a><!-- フォームURL未定（仮） -->
+        </div>
+      </section>
+
+      <!-- WORKS: カードは site.js が microCMS（works）から描画する（先頭5件 + 「全て見る」） -->
+      <section class="pb-works" id="works">
+        <div class="pb-works-head">
+          <h2 class="pb-sticker pb-sticker--works" data-paste><img src="./assets/headings/works.png" alt="WORKS" width="270" height="176" /></h2>
+        </div>
+        <div class="pb-works-board">
+          <div class="works-grid pb-works-grid" data-works-grid data-works-more="#worksMore" data-works-initial="5">
+            <!-- site.js が事例カードを差し込む -->
+          </div>
+          <noscript><p class="works-lead">事例一覧の表示にはJavaScriptが必要です。</p></noscript>
+        </div>
+        <a class="works-more pb-works-more" id="worksMore" href="./b/works/" hidden>
+          <svg class="pb-works-more-ring" viewBox="0 0 120 120" aria-hidden="true">
+            <defs><path id="pbMoreCircle" d="M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0" /></defs>
+            <text><textPath href="#pbMoreCircle">ALL WORKS ✦ ALL WORKS ✦ ALL WORKS ✦ </textPath></text>
+          </svg>
+          <span>全て見る</span><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg>
+        </a>
+      </section>
+
+      <!-- MEMBERS: PCは縦スクロールで横に流れる（ピン留め）。スマホは指で横スクロール -->
+      <section class="pb-members" id="members">
+        <div class="pb-members-pin">
+          <div class="pb-members-track" data-hscroll tabindex="0" aria-label="メンバー一覧（横にスクロールできます）">
+            <h2 class="pb-sticker pb-sticker--members"><img src="./assets/headings/members.png" alt="MEMBERS" width="458" height="265" /></h2>
+            <ul class="pb-members-list">
+              <li class="pb-member"><a class="pb-member-link" href="./b/members/hirochika-horiuchi/"><span class="pb-member-photo"><img src="./assets/members/horiuchi.jpg" alt="" loading="lazy" /></span><span class="pb-member-name pb-member-name--l" style="--tilt:-6.16deg">Hirochika Horiuchi</span></a></li>
+              <li class="pb-member"><a class="pb-member-link" href="./b/members/jun-ebata/"><span class="pb-member-photo"><img src="./assets/members/ebata.jpg" alt="" loading="lazy" /></span><span class="pb-member-name pb-member-name--s" style="--tilt:3.76deg">Jun Ebata</span></a></li>
+              <li class="pb-member"><a class="pb-member-link" href="./b/members/yuta-yasutake/"><span class="pb-member-photo"><img src="./assets/members/yasutake.jpg" alt="" loading="lazy" /></span><span class="pb-member-name pb-member-name--m" style="--tilt:-1.79deg">Yuta Yasutake</span></a></li>
+              <!-- ▼ サンプル（仮）: index.html と同じ -->
+              <li class="pb-member"><a class="pb-member-link" href="./b/members/sample-hanako-yamada/"><span class="pb-member-photo is-illust" style="--bg:#e9f5b8"><img src="./assets/stickers/holiday-kun-thinking.png" alt="" loading="lazy" /></span><span class="pb-member-name pb-member-name--r" style="--tilt:4.2deg">Hanako Yamada</span></a></li>
+              <li class="pb-member"><a class="pb-member-link" href="./b/members/sample-taro-suzuki/"><span class="pb-member-photo is-illust" style="--bg:#cfe7ff"><img src="./assets/stickers/works/monster-illustration.png" alt="" loading="lazy" /></span><span class="pb-member-name pb-member-name--l" style="--tilt:-4.5deg">Taro Suzuki</span></a></li>
+              <li class="pb-member"><a class="pb-member-link" href="./b/members/sample-aoi-tanaka/"><span class="pb-member-photo is-illust" style="--bg:#ffe1ec"><img src="./assets/stickers/works/holiday-cola.png" alt="" loading="lazy" /></span><span class="pb-member-name pb-member-name--m" style="--tilt:2.4deg">Aoi Tanaka</span></a></li>
+              <li class="pb-member"><a class="pb-member-link" href="./b/members/sample-ken-sato/"><span class="pb-member-photo is-illust" style="--bg:#fff0c2"><img src="./assets/stickers/works/goichi-character.png" alt="" loading="lazy" /></span><span class="pb-member-name pb-member-name--s" style="--tilt:-2.8deg">Ken Sato</span></a></li>
+              <li class="pb-member"><a class="pb-member-link" href="./b/members/sample-mio-kobayashi/"><span class="pb-member-photo is-illust" style="--bg:#e6e0ff"><img src="./assets/stickers/works/ebisun.png" alt="" loading="lazy" /></span><span class="pb-member-name pb-member-name--r" style="--tilt:5.1deg">Mio Kobayashi</span></a></li>
+            </ul>
+          </div>
+          <div class="pb-members-meter" aria-hidden="true"><i></i></div>
+        </div>
+      </section>
+
+      <!-- COMPANY: 罫線が左から引かれ、取引先は2段のマーキーで流れる -->
+      <section class="pb-company" id="company">
+        <h2 class="pb-sticker pb-sticker--company" data-paste><img src="./assets/headings/company.png" alt="COMPANY" width="465" height="90" /></h2>
+        <dl class="pb-company-list">
+          <div data-rule><dt>社名</dt><dd>株式会社スタジオホリデイ</dd></div>
+          <div data-rule><dt>代表者</dt><dd>代表取締役CEO　堀内弘誓</dd></div>
+          <div data-rule><dt>設立年月日</dt><dd>2018年8月</dd></div>
+          <div data-rule><dt>オフィス所在地</dt><dd>〒169-0073 東京都新宿区百人町1丁目10−15　JR新大久保駅ビル4F K,D,C,,,</dd></div>
+          <div data-rule class="pb-company-clients">
+            <dt>主な取引先</dt>
+            <dd>
+              <ul class="pb-clients-list">
+                <li>トヨタ自動車</li><li>ソニーグループ</li><li>三菱商事</li><li>日立製作所</li><li>パナソニック</li>
+                <li>任天堂</li><li>ソフトバンク</li><li>三井物産</li><li>キーエンス</li><li>NTTデータ</li>
+                <li>リクルート</li><li>KDDI</li><li>伊藤忠商事</li><li>ファーストリテイリング</li><li>デンソー</li>
+              </ul>
+            </dd>
+          </div>
+        </dl>
+        <!-- 取引先のマーキー（見た目用。読み上げは上のリスト） -->
+        <div class="pb-clients-marquee" aria-hidden="true">
+          <div class="pb-clients-row" data-marquee="1"><div class="pb-band-track"></div></div>
+          <div class="pb-clients-row" data-marquee="-1"><div class="pb-band-track"></div></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="pb-footer">
+    <div class="pb-footer-main">
+      <div class="pb-footer-left">
+        <img class="pb-footer-logo" src="./assets/footer-logo.png" alt="STUDIO HOLIDAY" />
+        <div class="pb-footer-addr">
+          <p>株式会社スタジオホリデイ</p>
+          <p>〒169-0073 東京都新宿区百人町1丁目10−15　JR新大久保駅ビル4F K,D,C,,,</p>
+          <a class="pb-footer-contact" href="#contact" data-magnet>CONTACT</a>
+        </div>
+      </div>
+      <nav class="pb-footer-nav">
+        <div class="fnav-col">
+          <a class="fnav-head" href="#">TOP</a>
+          <div class="fnav-sub">
+            <a href="#about">ABOUT</a>
+            <a href="#business">BUSINESS</a>
+            <a href="#works">WORKs</a>
+            <a href="#members">MEMBERS</a>
+            <a href="#company">COMPANY</a>
+            <a href="#contact">CONTACT</a>
+          </div>
+        </div>
+        <div class="fnav-col">
+          <a class="fnav-head" href="#business">BUSINESS</a>
+          <div class="fnav-sub">
+            <a href="./b/design-process.html">DESIGN PROCESS</a>
+            <a href="./b/food-design.html">FOOD DESIGN</a>
+            <a href="./b/community-space.html">COMMUNITY &amp; SPACE</a>
+          </div>
+        </div>
+        <div class="fnav-col">
+          <a class="fnav-head" href="./b/works/">WORKs</a>
+          <div class="fnav-sub" data-footer-works><!-- 先頭5件の事例ページ -->
+            <a href="./b/works/sushiro/">スシロー</a>
+            <a href="./b/works/pondelion/">ポン・デ・ライオン</a>
+            <a href="./b/works/yappy/">yappy</a>
+            <a href="./b/works/holiday-cola-ginger-apple/">休日コーラ GINGER APPLE</a>
+            <a href="./b/works/itomaki-ac-adapter/">itomaki AC Adapter</a>
+          </div>
+        </div>
+        <div class="fnav-col">
+          <a class="fnav-head" href="./b/members/">MEMBERS</a>
+        </div>
+        <div class="fnav-col">
+          <a class="fnav-ext" href="https://kdc-foodlab.com/" target="_blank" rel="noopener">K,D,C,,,<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>
+          <a class="fnav-ext" href="https://lab.studioholiday.jp/" target="_blank" rel="noopener">休日コーラ<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>
+          <a class="fnav-ext" href="https://substack.studioholiday.jp/" target="_blank" rel="noopener">Newsletter<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>
+        </div>
+      </nav>
+    </div>
+    <!-- 巨大なロゴがせり上がってくる -->
+    <div class="pb-footer-mark" aria-hidden="true"><img src="./assets/fv-logo.svg" alt="" /></div>
+    <div class="pb-footer-bottom">
+      <p>© STUDIO HOLIDAY ALL RIGHT RESERVED</p>
+      <a class="pb-totop" href="#" data-magnet aria-label="ページの先頭へ">↑</a>
+    </div>
+  </footer>
+
+  <!-- ▼ ステッカークリック時の詳細ドロワー（index.html と同じ。main.js が使う） -->
+  <aside class="work-drawer" id="workDrawer" hidden>
+    <div class="work-drawer-backdrop" data-close></div>
+    <article class="work-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" data-lenis-prevent>
+      <button class="work-drawer-close" type="button" data-close aria-label="閉じる">×</button>
+      <div class="wd-hero">
+        <div class="wd-visual"><img id="drawerImg" alt="" /></div>
+      </div>
+      <div class="wd-main wd-main--head">
+        <h1 id="drawerTitle"></h1>
+        <ul class="wd-tags" id="drawerTags"></ul>
+        <p class="wd-lead" id="drawerDesc"></p>
+      </div>
+      <section class="wd-related wd-related--compact" id="drawerRelated" hidden>
+        <h2>Related Works</h2>
+        <div class="works-board">
+          <div class="works-grid" id="drawerRelatedGrid"></div>
+        </div>
+        <a class="btn-lime works-all" id="drawerPageLink" href="./b/works/"><span>この事例のページを開く</span><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg></a>
+      </section>
+      <div class="wd-main wd-main--body">
+        <div class="work-body" id="drawerBody" hidden></div>
+        <p class="work-note" id="drawerNote" hidden>※ 詳細記事の本文はmicroCMSの「本文」入稿待ちです。ここに事例記事がそのまま入ります。（仮）</p>
+        <div id="drawerCredit"></div>
+      </div>
+    </article>
+  </aside>
+
+  <script src="./cms-config.js?v=20260816-4"></script>
+  <script src="./site.js?v=20260926-1"></script>
+  <script src="./proposal-b/pb-links.js?v=20260929-2" data-broot="./b/"></script>
+  <script src="./main.js?v=20260926-1"></script>
+  <!-- モーション: GSAP + ScrollTrigger + Lenis（読み込めなくても表示は崩れない） -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+  <script src="./proposal-b/pb-core.js?v=20260929-2"></script>
+  <script src="./proposal-b/pb.js?v=20260929-2"></script>
+</body>
+</html>

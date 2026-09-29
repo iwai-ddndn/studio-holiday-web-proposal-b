@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<!-- ▼ デザイン案B: scripts/build_proposal_b.py が本番ページ（members/index.html）から生成。手で編集しないこと -->
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" /><!-- 確認用サイトのため検索除け（本番公開時に外す） -->
+  <title>MEMBERS | STUDIO HOLIDAY（デザイン案B）</title>
+  <meta name="description" content="STUDIO HOLIDAYのメンバー紹介です。" />
+  <meta property="og:title" content="MEMBERS | STUDIO HOLIDAY" />
+  <meta property="og:type" content="website" />
+  <meta property="og:description" content="STUDIO HOLIDAYのメンバー紹介です。" />
+  <meta property="og:url" content="https://iwai-ddndn.github.io/studio-holiday-web-prototype/members/" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&amp;family=Roboto+Condensed:wght@300;600&amp;family=Noto+Sans+JP:wght@100;400;600;700;800;900&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css?v=20260926-1" />
+  <link rel="stylesheet" href="../../proposal-b/pb.css?v=20260929-2" />
+  <link rel="stylesheet" href="../../proposal-b/pb-sub.css?v=20260929-2" />
+  <script>document.documentElement.classList.add("pb-js");</script>
+</head>
+<body class="sub-page members-page pb pb-sub">
+  <!-- ページ遷移の幕（入ってきた時は上に抜け、リンクを押すと下からかぶさる） -->
+  <div class="pb-curtain is-cover" aria-hidden="true"><span class="pb-curtain-mark"></span></div>
+  <div class="pb-cursor" aria-hidden="true"><span class="pb-cursor-label"></span></div>
+  <div class="pb-progress" aria-hidden="true"><i></i></div>
+
+  <!-- scripts/build_pages.py が data/members.json から生成。手で編集しないこと。 -->
+  <header class="site-header">
+    <div class="header-pill">
+      <a class="brand" href="../../index-b.html">
+        <span class="brand-logo"><img src="../../assets/header-logo.png" alt="" aria-hidden="true" /></span>
+        <span>STUDIO&nbsp;HOLIDAY</span>
+      </a>
+      <button class="nav-toggle" type="button" aria-label="メニューを開く" aria-expanded="false" aria-controls="siteNav">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="site-nav" id="siteNav">
+        <a href="../../index-b.html"><span class="pb-roll"><span>TOP</span></span></a>
+        <a href="../../index-b.html#about"><span class="pb-roll"><span>ABOUT</span></span></a>
+        <a href="../../index-b.html#business"><span class="pb-roll"><span>BUSINESS</span></span></a>
+        <a href="../works/"><span class="pb-roll"><span>WORKs</span></span></a>
+        <a href="./"><span class="pb-roll"><span>MEMBERS</span></span></a>
+        <a href="../../index-b.html#company"><span class="pb-roll"><span>COMPANY</span></span></a>
+        <a class="nav-contact" href="../../index-b.html#contact">お問い合わせ</a><!-- スマホのメニュー内のみ表示 -->
+      </nav>
+    </div>
+    <a class="header-contact" href="../../index-b.html#contact"><span class="pb-roll"><span>お問い合わせ</span></span></a>
+  </header>
+
+  <main>
+    <div class="pb-hero-stage pb-hero-stage--sub">
+    <section class="page-hero">
+      <h1 class="sticker-head" style="--w:458px;--tilt:-7.39deg"><img src="../../assets/headings/members.png" alt="MEMBERS" width="458" height="265" /></h1>
+    </section>
+    </div>
+    <div class="pb-sheet">
+
+    <section class="members-board">
+      <ul class="members-grid">
+        <li class="member"><a class="member-link" href="./hirochika-horiuchi/"><span class="member-photo"><img src="../../assets/members/horiuchi.jpg" alt="" loading="lazy" /></span><span class="member-name member-name--l" style="--tilt:-6.16deg">Hirochika Horiuchi</span></a></li>
+        <li class="member"><a class="member-link" href="./jun-ebata/"><span class="member-photo"><img src="../../assets/members/ebata.jpg" alt="" loading="lazy" /></span><span class="member-name member-name--s" style="--tilt:3.76deg">Jun Ebata</span></a></li>
+        <li class="member"><a class="member-link" href="./yuta-yasutake/"><span class="member-photo"><img src="../../assets/members/yasutake.jpg" alt="" loading="lazy" /></span><span class="member-name member-name--m" style="--tilt:-1.79deg">Yuta Yasutake</span></a></li>
+        <!-- ▼ sample:true はレイアウト確認用のサンプル（仮）。data/members.json で実メンバーに差し替える -->
+        <li class="member"><a class="member-link" href="./sample-hanako-yamada/"><span class="member-photo is-illust" style="--bg:#e9f5b8"><img src="../../assets/stickers/holiday-kun-thinking.png" alt="" loading="lazy" /></span><span class="member-name member-name--r" style="--tilt:4.2deg">Hanako Yamada</span></a></li>
+        <li class="member"><a class="member-link" href="./sample-taro-suzuki/"><span class="member-photo is-illust" style="--bg:#cfe7ff"><img src="../../assets/stickers/works/monster-illustration.png" alt="" loading="lazy" /></span><span class="member-name member-name--l" style="--tilt:-4.5deg">Taro Suzuki</span></a></li>
+        <li class="member"><a class="member-link" href="./sample-aoi-tanaka/"><span class="member-photo is-illust" style="--bg:#ffe1ec"><img src="../../assets/stickers/works/holiday-cola.png" alt="" loading="lazy" /></span><span class="member-name member-name--m" style="--tilt:2.4deg">Aoi Tanaka</span></a></li>
+        <li class="member"><a class="member-link" href="./sample-ken-sato/"><span class="member-photo is-illust" style="--bg:#fff0c2"><img src="../../assets/stickers/works/goichi-character.png" alt="" loading="lazy" /></span><span class="member-name member-name--s" style="--tilt:-2.8deg">Ken Sato</span></a></li>
+        <li class="member"><a class="member-link" href="./sample-mio-kobayashi/"><span class="member-photo is-illust" style="--bg:#e6e0ff"><img src="../../assets/stickers/works/ebisun.png" alt="" loading="lazy" /></span><span class="member-name member-name--r" style="--tilt:5.1deg">Mio Kobayashi</span></a></li>
+      </ul>
+    </section>
+    </div>
+  </main>
+
+  <footer class="pb-footer">
+    <div class="pb-footer-main">
+      <div class="pb-footer-left">
+        <img class="pb-footer-logo" src="../../assets/footer-logo.png" alt="STUDIO HOLIDAY" />
+        <div class="pb-footer-addr">
+          <p>株式会社スタジオホリデイ</p>
+          <p>〒169-0073 東京都新宿区百人町1丁目10−15　JR新大久保駅ビル4F K,D,C,,,</p>
+          <a class="pb-footer-contact" data-magnet href="../../index-b.html#contact">CONTACT</a>
+        </div>
+      </div>
+      <nav class="pb-footer-nav">
+        <div class="fnav-col">
+          <a class="fnav-head" href="../../index-b.html">TOP</a>
+          <div class="fnav-sub">
+            <a href="../../index-b.html#about">ABOUT</a>
+            <a href="../../index-b.html#business">BUSINESS</a>
+            <a href="../../index-b.html#works">WORKs</a>
+            <a href="../../index-b.html#members">MEMBERS</a>
+            <a href="../../index-b.html#company">COMPANY</a>
+            <a href="../../index-b.html#contact">CONTACT</a>
+          </div>
+        </div>
+        <div class="fnav-col">
+          <a class="fnav-head" href="../../index-b.html#business">BUSINESS</a>
+          <div class="fnav-sub">
+            <a href="../design-process.html">DESIGN PROCESS</a>
+            <a href="../food-design.html">FOOD DESIGN</a>
+            <a href="../community-space.html">COMMUNITY &amp; SPACE</a>
+          </div>
+        </div>
+        <div class="fnav-col">
+          <a class="fnav-head" href="../works/">WORKs</a>
+          <div class="fnav-sub"><!-- 先頭5件の事例ページ -->
+            <a href="../works/sushiro/">スシロー</a>
+            <a href="../works/pondelion/">ポン・デ・ライオン</a>
+            <a href="../works/yappy/">yappy</a>
+            <a href="../works/holiday-cola-ginger-apple/">休日コーラ GINGER APPLE</a>
+            <a href="../works/itomaki-ac-adapter/">itomaki AC Adapter</a>
+          </div>
+        </div>
+        <div class="fnav-col">
+          <a class="fnav-head" href="./">MEMBERS</a>
+        </div>
+        <div class="fnav-col">
+          <a class="fnav-ext" href="https://kdc-foodlab.com/" target="_blank" rel="noopener">K,D,C,,,<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>
+          <a class="fnav-ext" href="https://lab.studioholiday.jp/" target="_blank" rel="noopener">休日コーラ<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>
+          <a class="fnav-ext" href="https://substack.studioholiday.jp/" target="_blank" rel="noopener">Newsletter<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>
+        </div>
+      </nav>
+    </div>
+    <div class="pb-footer-mark" aria-hidden="true"></div>
+    <div class="pb-footer-bottom">
+      <p>© STUDIO HOLIDAY ALL RIGHT RESERVED</p>
+      <a class="pb-totop" href="#" data-magnet aria-label="ページの先頭へ">↑</a>
+    </div>
+  </footer>
+
+  <script src="../../cms-config.js?v=20260926-1"></script>
+  <script src="../../site.js?v=20260926-1"></script>
+  <script src="../../proposal-b/pb-links.js?v=20260929-2" data-broot="../"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+  <script src="../../proposal-b/pb-core.js?v=20260929-2"></script>
+  <script src="../../proposal-b/pb-sub.js?v=20260929-2"></script>
+</body>
+</html>
