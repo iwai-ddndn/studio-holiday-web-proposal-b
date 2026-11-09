@@ -55,6 +55,21 @@
   $$('[data-split]').forEach((el) => PB.popTitle(el));
   PB.inkLines($$('[data-lines] > span'));
 
+  // ABOUTの漂うステッカーは、壁と同じ加工済みの事例ステッカー（microCMS準拠）を当てる。
+  // 毎回ランダムに選び、同じ絵柄は重ねない。取得できなければ非表示のまま
+  const cmsFloaters = $$('.pb-floater[data-cms-sticker]');
+  if (cmsFloaters.length && window.stickerSpritesReady) {
+    window.stickerSpritesReady.then((sprites) => {
+      const pool = [...(sprites || [])].sort(() => Math.random() - 0.5);
+      cmsFloaters.forEach((img, i) => {
+        const s = pool[i % (pool.length || 1)];
+        if (!s) return;
+        img.src = s.url;
+        img.classList.add('is-ready');
+      });
+    });
+  }
+
   $$('.pb-floater').forEach((img) => {
     const sp = Number(img.dataset.speed) || 0.3;
     gsap.fromTo(img, { y: -sp * 260, rotation: -sp * 20 }, {

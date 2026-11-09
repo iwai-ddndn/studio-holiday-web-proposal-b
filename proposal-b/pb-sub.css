@@ -342,10 +342,14 @@
 
 /* ---------- 事例詳細 / メンバー詳細（.wd） ---------- */
 .pb-sub .wd-hero {
+  position: relative;
+  z-index: 2; /* 下にはみ出すステッカーを本文より手前に出す */
   height: clamp(380px, 56vh, 520px);
   background: var(--fig-lime) url("../assets/texture-halftone-lime.png");
   background-size: 720px auto;
-  overflow: hidden;
+  overflow: hidden;       /* clip 非対応ブラウザ向け */
+  overflow-x: clip;       /* 横にはみ出す大きな文字だけ切り、 */
+  overflow-y: visible;    /* 下にはみ出すステッカーは見せる */
 }
 .pb-sub .wd-visual {
   top: auto;

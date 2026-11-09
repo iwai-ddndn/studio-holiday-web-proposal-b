@@ -1015,6 +1015,12 @@ try {
   }
 } catch { /* 保存なし */ }
 PARAMS.size = Math.max(0.95, PARAMS.size);
+// 台紙・素材の一括プレビューは ?tune を付けて開いている時だけ効かせる。
+// （保存値が残ったまま通常表示でもCMSの指定を上書きし、「CMSで設定したのに反映されない」になるのを防ぐ）
+if (!/[?&]tune\b/.test(location.search)) {
+  PARAMS.stickerBase = '';
+  PARAMS.stickerFinish = '';
+}
 // 旧パラメータ（fvGrid: 0/1）からの引き継ぎ
 if (PARAMS.fvGrid === 1 && !('fvTexture' in (JSON.parse(localStorage.getItem('sh-tune') || '{}')))) {
   PARAMS.fvTexture = 'grid';
@@ -1558,7 +1564,10 @@ async function applySubstackTicker() {
 }
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-loadCMSContent().finally(() => {
+const cmsLoaded = loadCMSContent();
+// 壁と同じ加工済みステッカー（CMSの事例画像 + 台紙の指定）を、ほかのセクションの飾りにも使えるようにする
+window.stickerSpritesReady = cmsLoaded.catch(() => {}).then(() => getSprites());
+cmsLoaded.finally(() => {
   build({ intro: !reducedMotion }).then(() => {
     if (reducedMotion) skipIntro();
   });

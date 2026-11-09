@@ -250,6 +250,10 @@ a:hover > .pb-roll > span { transform: translateY(-1.3em); }
     drop-shadow(0 8px 10px rgba(0, 0, 0, 0.14));
   animation: pbFloat 5.5s ease-in-out infinite alternate;
 }
+/* CMSの事例ステッカーを当てる枠: 画像が入るまでは出さない。
+   画像は白フチと影を焼き込み済みなので、CSSの白フチ・影は重ねない */
+.pb-floater[data-cms-sticker] { filter: none; }
+.pb-floater[data-cms-sticker]:not(.is-ready) { visibility: hidden; }
 .pb-floater:nth-child(2n) { animation-duration: 7s; animation-delay: -2s; }
 .pb-floater:nth-child(3n) { animation-duration: 6.2s; animation-delay: -4s; }
 @keyframes pbFloat { from { translate: 0 -10px; } to { translate: 0 12px; } }
