@@ -134,9 +134,38 @@ function normalizeWorks(contents) {
       credit: c.credit || (local ? local.credit || '' : ''), // 「役割: 名前」を改行区切りで
       // imgix変換で幅を抑えつつPNG化（切り抜きの透過を保持）
       image: c.sticker && c.sticker.url ? `${c.sticker.url}?w=1000&fm=png` : (local ? local.image : ''),
+      // TOP壁ステッカーの見た目（台紙の色・素材）。未入力なら白台紙・通常
+      stickerLook: stickerLookOf(c),
     };
   });
 }
+
+/* ステッカーの台紙・素材の指定を正規化する。
+ * microCMSのセレクトは配列で返るので、配列・文字列のどちらでも受ける。
+ * 表示名（白/ライム…）と英語キー（white/lime…）のどちらでも可。 */
+const STICKER_BASES = {
+  白: '#ffffff', white: '#ffffff',
+  ライム: '#d5f409', lime: '#d5f409',
+  黒: '#1a1a1a', black: '#1a1a1a',
+  フチなし: 'none', none: 'none',
+};
+const STICKER_FINISHES = {
+  通常: 'normal', normal: 'normal',
+  ホログラム: 'holo', holo: 'holo',
+  ラメ: 'glitter', glitter: 'glitter',
+  クリア: 'clear', clear: 'clear',
+};
+const firstOf = (v) => String((Array.isArray(v) ? v[0] : v) || '').trim();
+function stickerLookOf(c) {
+  const hex = firstOf(c.stickerColor);
+  const base = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex)
+    ? hex
+    : STICKER_BASES[firstOf(c.stickerBase)] || STICKER_BASES[firstOf(c.stickerBase).toLowerCase()] || '#ffffff';
+  const f = firstOf(c.stickerFinish);
+  const finish = STICKER_FINISHES[f] || STICKER_FINISHES[f.toLowerCase()] || 'normal';
+  return { base, finish };
+}
+window.stickerLookOf = stickerLookOf;
 
 const localWorks = () => WORKS_FALLBACK.map((w) => ({ ...w, id: w.slug, body: '' }));
 

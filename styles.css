@@ -286,6 +286,87 @@ body {
   transform: var(--tf) scale(1.06) translateY(-2px);
 }
 
+/* ---------- 素材エフェクト（ホログラム / ラメ） ----------
+ * 台紙の形のマスク（--fx-mask, JSが生成）で切り抜いた光の層。
+ * .sticker は transform を持つのでスタッキングコンテキストになり、
+ * ブレンドはステッカーの絵柄・台紙とだけ起こる（壁の背景には混ざらない）。
+ * 動かすのは transform / opacity だけ。 */
+.sticker-fx {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask: var(--fx-mask) center / 100% 100% no-repeat;
+          mask: var(--fx-mask) center / 100% 100% no-repeat;
+}
+.sticker-fx > span {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* ホログラム: 虹色の層（斜めに流れる）+ 白い光の帯 */
+.sticker-fx--holo .fx-rainbow {
+  inset: -50% -150%;
+  background: repeating-linear-gradient(
+    115deg,
+    #ff8fcf 0%, #ffd36e 8%, #a6ff8a 16%, #6fe3ff 24%, #a98bff 32%, #ff8fcf 40%
+  );
+  mix-blend-mode: multiply;
+  opacity: 0.42;
+  animation: fxHoloShift 6s ease-in-out var(--fx-delay, 0s) infinite alternate;
+}
+.sticker-fx--holo .fx-glare {
+  inset: -20% -60%;
+  background: linear-gradient(
+    115deg,
+    transparent 38%, rgba(255, 255, 255, 0.75) 47%, rgba(255, 255, 255, 0.15) 51%,
+    rgba(255, 255, 255, 0.55) 54%, transparent 62%
+  );
+  mix-blend-mode: screen;
+  animation: fxGlare 4.5s ease-in-out var(--fx-delay, 0s) infinite;
+}
+.sticker:hover .sticker-fx--holo .fx-rainbow { animation-duration: 2.4s; }
+
+@keyframes fxHoloShift {
+  from { transform: translateX(-22%); }
+  to   { transform: translateX(22%); }
+}
+@keyframes fxGlare {
+  0%, 20%  { transform: translateX(-60%); }
+  70%, 100% { transform: translateX(60%); }
+}
+
+/* ラメ: 銀色の薄い色味 + 粒の層2枚を交互に点滅 */
+.sticker-fx--glitter .fx-tint {
+  inset: 0;
+  /* 白い台紙でも粒が見えるよう、銀色の濃淡を敷いてから明るい粒を重ねる */
+  background:
+    linear-gradient(115deg, rgba(150, 160, 185, 0.55), rgba(225, 230, 240, 0.25) 35%, rgba(160, 150, 190, 0.5) 60%, rgba(215, 225, 240, 0.3));
+  mix-blend-mode: multiply;
+}
+.sticker-fx--glitter .fx-sparkle {
+  inset: 0;
+  background: var(--fx-glitter) 0 0 / 80px 80px repeat;
+  mix-blend-mode: screen;
+  animation: fxTwinkle 1.8s ease-in-out var(--fx-delay, 0s) infinite alternate;
+}
+.sticker-fx--glitter .fx-sparkle--b {
+  background-position: 37px 23px;
+  background-size: 64px 64px;
+  animation-direction: alternate-reverse;
+  animation-duration: 2.3s;
+}
+@keyframes fxTwinkle {
+  from { opacity: 0.15; }
+  to   { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sticker-fx > span { animation: none !important; }
+  .sticker-fx--glitter .fx-sparkle { opacity: 0.7; }
+  .sticker-fx--glitter .fx-sparkle--b { opacity: 0.35; }
+}
+
 /* ---------- 輪郭タグ ----------
  * ステッカーの実績情報を外周パスに沿わせて表示するSVGオーバーレイ。
  * 文字サイズ・縁取り太さはJS側でviewBox比にスケールして画面上12px相当にする */

@@ -30,6 +30,8 @@ const stickerOfWork = (w) => ({
   client: w.client || '',
   // slug / body はドロワーで記事本文を出すために持ち回る（事例ページと同じ内容）
   work: { kind: w.kind || '', title: w.title, desc: w.description || '', slug: w.slug, body: w.body || '' },
+  // 台紙の色・素材（microCMSの stickerBase / stickerColor / stickerFinish。フォールバックは白・通常）
+  look: w.stickerLook || window.stickerLookOf(w),
 });
 
 let STICKERS = [];
@@ -172,10 +174,45 @@ function trimWhiteBackground(img) {
   return c;
 }
 
-function makeDiecutSprite(art, artSize) {
+/* クリア素材の縁線: 台紙マスクを内側に削った形との差分＝細いリングを描く */
+function drawClearRim(ctx, silhouette, SW, SH, ART, tint) {
+  const r = Math.max(1.5, ART * 0.006);
+  const eroded = document.createElement('canvas');
+  eroded.width = SW; eroded.height = SH;
+  const ectx = eroded.getContext('2d');
+  ectx.drawImage(silhouette, 0, 0);
+  ectx.globalCompositeOperation = 'destination-in'; // 各方向にずらした形の共通部分 = 収縮
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2;
+    ectx.drawImage(silhouette, Math.cos(a) * r, Math.sin(a) * r);
+  }
+  const rim = document.createElement('canvas');
+  rim.width = SW; rim.height = SH;
+  const rctx = rim.getContext('2d');
+  rctx.drawImage(silhouette, 0, 0);
+  rctx.globalCompositeOperation = 'destination-out';
+  rctx.drawImage(eroded, 0, 0);
+  rctx.globalCompositeOperation = 'source-in';
+  rctx.fillStyle = tint && tint.toLowerCase() !== '#ffffff' ? tint : 'rgba(255, 255, 255, 0.95)';
+  rctx.fillRect(0, 0, SW, SH);
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.18)'; // 白い縁線が明るい背景でも見えるよう、ごく薄い輪郭影
+  ctx.shadowBlur = 1.5;
+  ctx.drawImage(rim, 0, 0);
+  ctx.restore();
+}
+
+/* look: { base: '#rrggbb' | 'none', finish: 'normal' | 'holo' | 'glitter' | 'clear' }
+ *   base   … 台紙（白フチ）の色。'none' は台紙なし（絵柄に直接影）
+ *   finish … clear は台紙を半透明にして縁線と光沢を焼き込む。
+ *            holo / glitter の動く光は buildSticker 側のオーバーレイ（maskUrl を使う） */
+function makeDiecutSprite(art, artSize, look = {}) {
   const ART = artSize || 520;       // 絵柄の描画サイズ（長辺）。ロゴ等の大判は高解像度で焼く
   const OUTLINE = ART * 0.045;      // 白フチの太さ
   const PAD = OUTLINE + ART * 0.07; // 白フチ+影のための余白
+  const base = look.base || '#ffffff';
+  const finish = look.finish || 'normal';
+  const noBase = base === 'none';
 
   const aw = art.naturalWidth || art.width;
   const ah = art.naturalHeight || art.height;
@@ -185,7 +222,7 @@ function makeDiecutSprite(art, artSize) {
   const SW = Math.round(dw + PAD * 2);
   const SH = Math.round(dh + PAD * 2);
 
-  // 1) 絵柄のシルエットを全方向にずらして重ね、白で塗る → 輪郭に沿った白フチ台紙
+  // 1) 絵柄のシルエットを全方向にずらして重ね、塗りつぶす → 輪郭に沿った台紙の形（不透明マスク）
   const silhouette = document.createElement('canvas');
   silhouette.width = SW; silhouette.height = SH;
   const sctx = silhouette.getContext('2d');
@@ -198,6 +235,21 @@ function makeDiecutSprite(art, artSize) {
   sctx.globalCompositeOperation = 'source-in';
   sctx.fillStyle = '#ffffff';
   sctx.fillRect(0, 0, SW, SH);
+  // タグ表示用に、台紙の外周輪郭をパス化して持たせる（フチなしでも同じ外周を使う）
+  const outline = traceOutline(silhouette, SW, SH);
+  const pathD = outline && outlineToPathD(outline);
+
+  // 台紙の色を塗った版（フチなしなら作らない）
+  let plate = null;
+  if (!noBase) {
+    plate = document.createElement('canvas');
+    plate.width = SW; plate.height = SH;
+    const pctx = plate.getContext('2d');
+    pctx.drawImage(silhouette, 0, 0);
+    pctx.globalCompositeOperation = 'source-in';
+    pctx.fillStyle = base;
+    pctx.fillRect(0, 0, SW, SH);
+  }
 
   // 2) 影付きで台紙を敷き、その上に絵柄を重ねる
   const out = document.createElement('canvas');
@@ -206,16 +258,66 @@ function makeDiecutSprite(art, artSize) {
   // Figmaのeffect style「sticker-ds」準拠: X0 / Y4 / Blur6 / Spread0 / #000 8%
   // （Figma上のステッカー幅324pxを基準に、描画サイズへスケール）
   const FIG = ART / 324;
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 4 * FIG;
-  ctx.shadowBlur = 6 * FIG;
-  ctx.drawImage(silhouette, 0, 0);
-  ctx.shadowColor = 'transparent';
-  ctx.drawImage(art, PAD, PAD, dw, dh);
-  // タグ表示用に、白フチ台紙（silhouette）の外周輪郭もパス化して持たせる
-  const outline = traceOutline(silhouette, SW, SH);
-  return { url: out.toDataURL('image/png'), w: SW, h: SH, pathD: outline && outlineToPathD(outline) };
+  const setShadow = (alpha) => {
+    ctx.shadowColor = `rgba(0, 0, 0, ${alpha})`;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 4 * FIG;
+    ctx.shadowBlur = 6 * FIG;
+  };
+  if (finish === 'clear') {
+    // クリア（透明ビニール）: 台紙は半透明。影は台紙ではなく絵柄から落とす（透明シートは影が薄い）
+    if (plate) {
+      ctx.globalAlpha = 0.32;
+      ctx.drawImage(plate, 0, 0);
+      ctx.globalAlpha = 1;
+    }
+    setShadow(0.1);
+    ctx.drawImage(art, PAD, PAD, dw, dh);
+    ctx.shadowColor = 'transparent';
+    // 縁線（シートの切り口）
+    drawClearRim(ctx, silhouette, SW, SH, ART, noBase ? null : base);
+    // 斜めの光沢: 台紙の形にクリップして白いグラデの帯を重ねる
+    const gloss = document.createElement('canvas');
+    gloss.width = SW; gloss.height = SH;
+    const gctx = gloss.getContext('2d');
+    gctx.drawImage(silhouette, 0, 0);
+    gctx.globalCompositeOperation = 'source-in';
+    const g = gctx.createLinearGradient(0, 0, SW, SH);
+    g.addColorStop(0.0, 'rgba(255,255,255,0)');
+    g.addColorStop(0.28, 'rgba(255,255,255,0)');
+    g.addColorStop(0.36, 'rgba(255,255,255,0.55)');
+    g.addColorStop(0.42, 'rgba(255,255,255,0.12)');
+    g.addColorStop(0.5, 'rgba(255,255,255,0.35)');
+    g.addColorStop(0.56, 'rgba(255,255,255,0)');
+    g.addColorStop(1.0, 'rgba(255,255,255,0)');
+    gctx.fillStyle = g;
+    gctx.fillRect(0, 0, SW, SH);
+    ctx.drawImage(gloss, 0, 0);
+  } else if (plate) {
+    setShadow(0.08);
+    ctx.drawImage(plate, 0, 0);
+    ctx.shadowColor = 'transparent';
+    ctx.drawImage(art, PAD, PAD, dw, dh);
+  } else {
+    // フチなし: 絵柄そのものに影を落とす
+    setShadow(0.14);
+    ctx.drawImage(art, PAD, PAD, dw, dh);
+    ctx.shadowColor = 'transparent';
+  }
+
+  // ホロ・ラメのオーバーレイ用マスク（台紙の形。フチなしは絵柄の形）
+  let maskUrl = null;
+  if (finish === 'holo' || finish === 'glitter') {
+    if (noBase) {
+      const m = document.createElement('canvas');
+      m.width = SW; m.height = SH;
+      m.getContext('2d').drawImage(art, PAD, PAD, dw, dh);
+      maskUrl = m.toDataURL('image/png');
+    } else {
+      maskUrl = silhouette.toDataURL('image/png');
+    }
+  }
+  return { url: out.toDataURL('image/png'), w: SW, h: SH, pathD, maskUrl, finish };
 }
 
 /* --- 輪郭抽出: タグをステッカーの外周に沿わせるためのパスを作る ---
@@ -315,9 +417,18 @@ function outlineToPathD(pts) {
     .join('') + 'Z';
 }
 
+/* ?tune の「台紙/素材（プレビュー）」が選ばれていれば、CMSの指定より優先して全ステッカーに当てる */
+const lookFor = (item) => ({
+  base: PARAMS.stickerBase || (item.look && item.look.base) || '#ffffff',
+  finish: PARAMS.stickerFinish || (item.look && item.look.finish) || 'normal',
+});
+
 const spriteOf = async (item) => {
-  const art = await loadArt(item);
-  return art && { alt: item.alt, work: item.work, client: item.client, ...makeDiecutSprite(art) };
+  // 画像の読み込み・切り抜きは重いので item ごとに1回だけ（台紙を焼き直すときは再利用）
+  item.artPromise ??= loadArt(item);
+  const art = await item.artPromise;
+  const look = lookFor(item);
+  return art && { alt: item.alt, work: item.work, client: item.client, look, ...makeDiecutSprite(art, undefined, look) };
 };
 
 let spritesPromise = null;
@@ -500,6 +611,50 @@ function stickerDims(sprite, size) {
     : { w: size * (sprite.w / sprite.h), h: size };
 }
 
+/* ホログラム・ラメの光のオーバーレイ。台紙の形のマスクで切り抜き、
+ * .sticker（transform でスタッキングコンテキスト）の中だけでブレンドする。
+ * 動きは transform / opacity のみ（合成だけで済む）。reduced-motion では静止 */
+let glitterTexUrl = null;
+function glitterTexture() {
+  if (glitterTexUrl) return glitterTexUrl;
+  const S = 160;
+  const c = document.createElement('canvas');
+  c.width = S; c.height = S;
+  const g = c.getContext('2d');
+  const tints = ['#ffffff', '#fff6c8', '#d8f6ff', '#ffd8f3', '#e9ffb0'];
+  for (let i = 0; i < 260; i++) {
+    const x = Math.random() * S, y = Math.random() * S;
+    const r = Math.random() < 0.85 ? rand(0.5, 1.2) : rand(1.4, 2.2);
+    g.fillStyle = tints[(Math.random() * tints.length) | 0];
+    g.globalAlpha = rand(0.55, 1);
+    g.beginPath();
+    g.arc(x, y, r, 0, Math.PI * 2);
+    g.fill();
+    if (r > 1.4) { // 大きい粒は十字の光
+      g.globalAlpha = 0.7;
+      g.fillRect(x - r * 2.6, y - 0.4, r * 5.2, 0.8);
+      g.fillRect(x - 0.4, y - r * 2.6, 0.8, r * 5.2);
+    }
+  }
+  glitterTexUrl = c.toDataURL('image/png');
+  return glitterTexUrl;
+}
+
+function buildFinishFx(sprite) {
+  const fx = document.createElement('span');
+  fx.className = `sticker-fx sticker-fx--${sprite.finish}`;
+  fx.setAttribute('aria-hidden', 'true');
+  fx.style.setProperty('--fx-mask', `url("${sprite.maskUrl}")`);
+  fx.style.setProperty('--fx-delay', `${(-Math.random() * 6).toFixed(2)}s`);
+  if (sprite.finish === 'holo') {
+    fx.innerHTML = '<span class="fx-rainbow"></span><span class="fx-glare"></span>';
+  } else {
+    fx.style.setProperty('--fx-glitter', `url("${glitterTexture()}")`);
+    fx.innerHTML = '<span class="fx-tint"></span><span class="fx-sparkle"></span><span class="fx-sparkle fx-sparkle--b"></span>';
+  }
+  return fx;
+}
+
 function buildSticker(sprite, opts) {
   const el = document.createElement(opts.href ? 'a' : 'div');
   if (opts.href) el.href = opts.href;
@@ -517,6 +672,7 @@ function buildSticker(sprite, opts) {
   img.draggable = false;
   img.src = sprite.url;
   el.appendChild(img);
+  if (sprite.maskUrl) el.appendChild(buildFinishFx(sprite));
 
   if (opts.onOpen) {
     el.setAttribute('role', 'button');
@@ -828,6 +984,8 @@ const DEFAULT_PARAMS = {
   fvTexture: 'halftone',    // FVのテクスチャ（本番デフォルト: アナログハーフトーン）
   fvTexColor: '#dff5f7',    // テクスチャの色（方眼の線・ドット等。halftoneでは無効）
   fvTexSize: 24,            // テクスチャの細かさ（px。halftoneではタイル幅の倍率）
+  stickerBase: '',          // 台紙のプレビュー（''=CMS設定どおり / #hex / 'none'）
+  stickerFinish: '',        // 素材のプレビュー（''=CMS設定どおり / normal / holo / glitter / clear）
 };
 let PARAMS = { ...DEFAULT_PARAMS };
 try { Object.assign(PARAMS, JSON.parse(localStorage.getItem('sh-tune')) || {}); } catch { /* 保存なし */ }
@@ -1249,6 +1407,14 @@ function initTunePanel() {
     '</select></label>' +
     '<label>テクスチャの色<input type="color" data-key="fvTexColor" /></label>' +
     '<label>テクスチャの細かさ<output id="tune-fvTexSize"></output><input type="range" data-key="fvTexSize" min="8" max="64" step="1" /></label>' +
+    '<label>台紙（プレビュー）<select data-key="stickerBase">' +
+      '<option value="">CMS設定どおり</option><option value="#ffffff">白</option>' +
+      '<option value="#d5f409">ライム</option><option value="#1a1a1a">黒</option><option value="none">フチなし</option>' +
+    '</select></label>' +
+    '<label>素材（プレビュー）<select data-key="stickerFinish">' +
+      '<option value="">CMS設定どおり</option><option value="normal">通常</option>' +
+      '<option value="holo">ホログラム</option><option value="glitter">ラメ</option><option value="clear">クリア</option>' +
+    '</select></label>' +
     '<div class="tune-actions">' +
     '<button type="button" data-act="intro">イントロ再生</button>' +
     '<button type="button" data-act="reset">リセット</button></div>';
@@ -1267,6 +1433,8 @@ function initTunePanel() {
     panel.querySelector('[data-key="fvTexColor"]').value = PARAMS.fvTexColor;
     panel.querySelector('[data-key="fvTexSize"]').value = PARAMS.fvTexSize;
     panel.querySelector('#tune-fvTexSize').textContent = PARAMS.fvTexSize + 'px';
+    panel.querySelector('[data-key="stickerBase"]').value = PARAMS.stickerBase || '';
+    panel.querySelector('[data-key="stickerFinish"]').value = PARAMS.stickerFinish || '';
   };
   sync();
 
@@ -1274,7 +1442,7 @@ function initTunePanel() {
   panel.addEventListener('input', (e) => {
     const k = e.target.dataset.key;
     if (!k) return;
-    if (k === 'fvBg' || k === 'fvTexture' || k === 'fvTexColor') {
+    if (k === 'fvBg' || k === 'fvTexture' || k === 'fvTexColor' || k === 'stickerBase' || k === 'stickerFinish') {
       PARAMS[k] = e.target.value;
     } else {
       PARAMS[k] = +e.target.value;
@@ -1282,6 +1450,7 @@ function initTunePanel() {
     localStorage.setItem('sh-tune', JSON.stringify(PARAMS));
     sync();
     if (k.startsWith('fv')) { applyFvParams(); return; } // 背景系は再ビルド不要
+    if (k.startsWith('sticker')) spritesPromise = null; // 台紙・素材は焼き直し（画像の読み込みは再利用）
     clearTimeout(debounce);
     debounce = setTimeout(() => build({ intro: false }), 250);
   });
@@ -1291,6 +1460,7 @@ function initTunePanel() {
     if (act === 'reset') {
       PARAMS = { ...DEFAULT_PARAMS };
       localStorage.removeItem('sh-tune');
+      spritesPromise = null;
       sync();
       applyFvParams();
       build({ intro: false });
