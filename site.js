@@ -22,6 +22,12 @@
  * ローカル素材を紐付けるキーになる）。
  * image はサイトルート起点の相対パス（FVステッカー・カード・詳細ページで共用）。
  * 紹介文はスプレッドシート「WORKS_Webサイト 事例集」の反映待ち（仮文言）。 */
+/* CMSのみ表示モード: URLに ?cms=only を付けると、microCMSに入っている内容だけで描く。
+ * ローカルのフォールバック・ダミー（サンプルメンバー・壁の記事写真・タイトル一致の画像）を使わず、
+ * CMSで足りていない所がそのまま見える（見た目の確認用）。画面右下に件数のバッジが出る */
+const CMS_ONLY = /[?&]cms=only\b/.test(location.search);
+window.CMS_ONLY = CMS_ONLY;
+
 const WORKS_FALLBACK = [
   { slug: 'smeedy', title: 'スミーディ', kind: 'キャラクターデザイン', client: '住友電気工業',
     image: './assets/works/jirei/smeedy-pose04.png',
@@ -119,7 +125,8 @@ async function fetchCMS(endpoint) {
  * CMSに画像が無ければ、タイトル一致でローカル素材を当てる
  * （メディアアップロードAPIが使えないプランでもテキストだけCMS管理できるようにするため）*/
 function normalizeWorks(contents) {
-  const localByTitle = new Map(WORKS_FALLBACK.map((w) => [w.title, w]));
+  // CMSのみ表示モードでは、ローカル素材での穴埋め（画像・slug・クレジット）をしない
+  const localByTitle = new Map(CMS_ONLY ? [] : WORKS_FALLBACK.map((w) => [w.title, w]));
   return contents.map((c) => {
     const local = localByTitle.get(c.title);
     return {
@@ -172,6 +179,7 @@ const localWorks = () => WORKS_FALLBACK.map((w) => ({ ...w, id: w.slug, body: ''
 /* works は FV・カード一覧・フッター・詳細ページで使うので、リクエストは1回だけにする */
 window.getWorks = () => (window.__worksPromise ??= (async () => {
   const contents = await fetchCMS('works');
+  if (CMS_ONLY) return contents ? normalizeWorks(contents) : []; // 取得失敗でもダミーに戻さない
   const works = contents && contents.length ? normalizeWorks(contents) : localWorks();
   return works.length ? works : localWorks();
 })());
@@ -270,7 +278,7 @@ async function initWorksGrids() {
   const grids = [...document.querySelectorAll('[data-works-grid]')];
   if (!grids.length) return;
   // CMS取得を待つ間に空欄が出ないよう、まずローカルデータで描いてから差し替える
-  grids.forEach((g) => renderWorksGrid(g, localWorks()));
+  if (!CMS_ONLY) grids.forEach((g) => renderWorksGrid(g, localWorks()));
   const works = await window.getWorks();
   grids.forEach((g) => renderWorksGrid(g, works));
 }
@@ -563,8 +571,59 @@ function initReveal() {
   });
 }
 
+/* ==========================================================
+   ▼ CMSのみ表示モード（?cms=only）: メンバー一覧の差し替えと件数バッジ
+   ========================================================== */
+
+const MEMBER_NAME_CYCLE = [['l', -6.16], ['s', 3.76], ['m', -1.79], ['r', 4.2]];
+
+/* 案BのTOPのMEMBERS（静的に生成済み・サンプル入り）を、microCMS members の中身で描き直す */
+function renderCmsMembers(members) {
+  const list = document.querySelector('.pb-members-list');
+  if (!list) return;
+  const root = './'; // 案BのTOP（index-b.html）はサイトのルートにある
+  list.innerHTML = '';
+  const valid = members.filter((m) => m.slug && m.name && m.photo && m.photo.url);
+  if (!valid.length) {
+    const li = document.createElement('li');
+    li.className = 'cms-only-empty';
+    li.textContent = 'microCMS の members にメンバーがまだ登録されていません（slug・名前・写真が揃ったものだけ表示）';
+    list.appendChild(li);
+    return;
+  }
+  valid.forEach((m, i) => {
+    const [pos, tilt] = MEMBER_NAME_CYCLE[i % MEMBER_NAME_CYCLE.length];
+    const li = document.createElement('li');
+    li.className = 'pb-member';
+    li.innerHTML =
+      `<a class="pb-member-link" href="${root}b/members/${encodeURIComponent(m.slug)}/">` +
+      `<span class="pb-member-photo"><img src="${esc(m.photo.url)}?w=800" alt="" loading="lazy" /></span>` +
+      `<span class="pb-member-name pb-member-name--${pos}" style="--tilt:${tilt}deg">${esc(m.name)}</span></a>`;
+    list.appendChild(li);
+  });
+}
+
+async function initCmsOnly() {
+  if (!CMS_ONLY) return;
+  document.documentElement.classList.add('is-cms-only');
+  const [works, members] = await Promise.all([window.getWorks(), fetchCMS('members')]);
+  renderCmsMembers(members || []);
+
+  const withImg = works.filter((w) => w.image).length;
+  const badge = document.createElement('div');
+  badge.className = 'cms-only-badge';
+  badge.innerHTML =
+    '<strong>microCMSのデータだけで表示中</strong>' +
+    `<span>事例 ${works.length}件（ステッカー画像あり ${withImg}件・壁に出るのはこの${withImg}件）</span>` +
+    `<span>メンバー ${members ? members.length : '取得失敗'}${members ? '件' : ''}</span>` +
+    '<span>壁の記事写真・サンプルメンバーは非表示</span>' +
+    `<a href="${location.pathname}">通常表示に戻る</a>`;
+  document.body.appendChild(badge);
+}
+
 // 詳細ページは自分自身を除外してからカードを描きたいので、順番に実行する
 initWorkDetail().then(initWorksGrids);
+initCmsOnly();
 initFooterWorks();
 initMobileNav();
 initHScroll();

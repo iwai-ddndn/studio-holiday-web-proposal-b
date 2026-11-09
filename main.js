@@ -435,7 +435,7 @@ let spritesPromise = null;
 function getSprites() {
   spritesPromise ??= Promise.all(STICKERS.map(spriteOf)).then(async (list) => {
     const okList = list.filter(Boolean);
-    if (okList.length) return okList;
+    if (okList.length || window.CMS_ONLY) return okList; // CMSのみ表示ではダミー素材に戻さない
     // CMS画像が1枚も読めなかった（CORS・リンク切れ等）→ ローカル素材で作り直す
     STICKERS = window.WORKS_FALLBACK.map((w) => stickerOfWork({ ...w, id: w.slug }));
     return (await Promise.all(STICKERS.map(spriteOf))).filter(Boolean);
@@ -1217,20 +1217,21 @@ async function build({ intro }) {
 
   // 写真のスポットは互いに離れた場所を選ぶ（足りなければ余りから充当）
   const minPhotoDist = Math.min(worldW, worldH) / 3.5;
+  const photos = window.CMS_ONLY ? [] : PHOTOS; // 記事写真はCMS管理外なので、CMSのみ表示では出さない
   const photoSpots = [];
   const shuffled = shuffle(spots);
   for (const p of shuffled) {
-    if (photoSpots.length >= PHOTOS.length) break;
+    if (photoSpots.length >= photos.length) break;
     if (photoSpots.every((q) => Math.hypot(p.x - q.x, p.y - q.y) >= minPhotoDist)) {
       photoSpots.push(p);
     }
   }
   for (const p of shuffled) {
-    if (photoSpots.length >= PHOTOS.length) break;
+    if (photoSpots.length >= photos.length) break;
     if (!photoSpots.includes(p)) photoSpots.push(p);
   }
   const availableStickerSpots = spots.filter((p) => !photoSpots.includes(p));
-  const arts = artSequence(sprites);
+  const arts = sprites.length ? artSequence(sprites) : [];
   const centralStickerSpots = centralSpotPool(availableStickerSpots, arts.length, {
     cx: worldW / 2,
     cy: worldH / 2,
