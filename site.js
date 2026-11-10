@@ -121,6 +121,22 @@ async function fetchCMS(endpoint) {
   }
 }
 
+/* FVの壁に貼る外部リンクカード（microCMS fv-links: title / url / image）。
+ * タイトルとURLが揃ったものだけ。API未作成・失敗時は [] */
+window.getFvLinks = async () => {
+  const contents = await fetchCMS('fv-links');
+  return (contents || [])
+    .filter((c) => c.title && /^https?:\/\//.test(c.url || ''))
+    .map((c) => ({
+      cap: c.title,
+      img: c.image && c.image.url ? `${c.image.url}?w=640` : '',
+      emoji: '🔗',
+      href: c.url,
+      external: true,
+      bg: '#eefafa',
+    }));
+};
+
 /* CMSのコンテンツを、サイト内で使う共通の形に揃える。
  * CMSに画像が無ければ、タイトル一致でローカル素材を当てる
  * （メディアアップロードAPIが使えないプランでもテキストだけCMS管理できるようにするため）*/
@@ -583,7 +599,9 @@ function renderCmsMembers(members) {
   if (!list) return;
   const root = './'; // 案BのTOP（index-b.html）はサイトのルートにある
   list.innerHTML = '';
-  const valid = members.filter((m) => m.slug && m.name && m.photo && m.photo.url);
+  const valid = members
+    .map((m) => ({ ...m, slug: m.slug || m.id }))
+    .filter((m) => m.slug && m.name && m.photo && m.photo.url);
   if (!valid.length) {
     const li = document.createElement('li');
     li.className = 'cms-only-empty';

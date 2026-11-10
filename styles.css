@@ -453,6 +453,21 @@ body {
   object-fit: cover;
   -webkit-user-drag: none;
 }
+/* 外部サイトへのリンクであることを示すバッジ（写真の右上） */
+.photo-ext {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--white);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
 .photo-cap {
   display: block;
   padding-top: 7px;

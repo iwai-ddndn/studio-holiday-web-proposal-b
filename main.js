@@ -41,29 +41,15 @@ let STICKERS = [];
  * 常に最前面・クリックで About へ */
 const LOGO = { file: 'sh-logo.png', alt: 'STUDIO HOLIDAY', href: '#about' };
 
-/* 実際のK,D,C,,,記事。画像もローカルに保持し、クリックで元記事を開く。 */
-const PHOTOS = [
+/* FVの壁に貼る「外部リンクの写真カード」（記事・イベントレポートなど）。
+ * microCMS の fv-links に1件でもあればそちらで置き換える（loadCMSContent）。
+ * 下はCMSに無いとき用の既定値（実際のK,D,C,,,記事。画像はローカルに保持）。
+ * 自社事例は壁にステッカーとして出るので、写真カードには入れない */
+let PHOTOS = [
   { cap: '【イベント】台湾料理ワークショップ', img: './assets/articles/taiwan-workshop.jpg', emoji: '📷', href: 'https://kdc-foodlab.com/post/j-Dju3A8', external: true, bg: '#eefafa' },
   { cap: '【イベント】きくがわ応援大使交流会in　K,D,C,,,', img: './assets/articles/kikugawa-event.png', emoji: '📷', href: 'https://kdc-foodlab.com/post/UzQU7SgF', external: true, bg: '#eefafa' },
   { cap: '【会員情報】CACAO HUNTERS　特別イベント', img: './assets/articles/cacao-hunters.png', emoji: '📷', href: 'https://kdc-foodlab.com/post/COdVcAEz', external: true, bg: '#eefafa' },
   { cap: '【インタビュー】日本製を世界へ――地方から未来をつなぐルフィ株式会社の挑戦', img: './assets/articles/luffy-interview.jpg', emoji: '📷', href: 'https://kdc-foodlab.com/post/X1Kh8nm8', external: true, bg: '#eefafa' },
-  { cap: 'ポン・デ・ライオン', img: './assets/works_pondelion01.jpg', emoji: '📷', href: './works.html', bg: '#eefafa' },
-  { cap: 'スシロー', img: './assets/works_sushiro.png', emoji: '📷', href: './works.html', bg: '#eefafa' },
-  { cap: 'エビシー', img: './assets/works/source/ebisun-osaka.png', emoji: '📷', href: './works.html', bg: '#eefafa' },
-  { cap: 'いちばんのおしごと', img: './assets/works/source/ichiban-no-oshigoto.png', emoji: '📷', href: './works.html', bg: '#eefafa' },
-  { cap: 'itomaki AC Adapter', img: './assets/works/source/itomaki-ac-adapter.png', emoji: '📷', href: './works.html', bg: '#eefafa' },
-  { cap: '休日コーラ GINGER APPLE', img: './assets/works/source/holiday-cola.png', emoji: '📷', href: './works.html', bg: '#eefafa' },
-  /* ▼ Drive「Webサイト:事例集」掲載事例（紹介文はWORKSシート反映待ち） */
-  { cap: 'うねり 企業ブランディング', img: './assets/works/jirei/uneri-ogp.png', emoji: '📷', href: './works.html', bg: '#eefafa' },
-  { cap: '十山ブランディング', img: './assets/works/jirei/juzan-photo1.jpg', emoji: '📷', href: './works.html', bg: '#eefafa' },
-  { cap: '採用ブランディング支援', img: './assets/works/jirei/recruit-branding-pc.jpg', emoji: '📷', href: './works.html', bg: '#eefafa' },
-  { cap: '「みんなで知りたい」シリーズ', img: './assets/works/jirei/minna-shiritai-1.jpg', emoji: '📷', href: './works.html', bg: '#eefafa' },
-  { cap: 'yappy', img: './assets/works/jirei/yappy-a2-layout.png', emoji: '📷', href: './works.html', bg: '#eefafa' },
-  { cap: 'K,D,C,,,', img: './assets/works/jirei/kdc-top-visual.png', emoji: '📷', href: './works.html', bg: '#eefafa' },
-  { cap: 'K,D,C,,,meet クラフトシードル', img: './assets/works/jirei/craft-cidre.jpg', emoji: '📷', href: './works.html', bg: '#eefafa' },
-  { cap: '休日COLA', img: './assets/works/jirei/holiday-cola-top.png', emoji: '📷', href: './works.html', bg: '#eefafa' },
-  { cap: '休日COLA de お知らせ（2026夏）', img: './assets/works/jirei/holiday-cola-card.jpg', emoji: '📷', href: './works.html', bg: '#eefafa' },
-  { cap: '学際型メッシュネットワーク', img: './assets/works/jirei/mesh-network.jpg', emoji: '📷', href: './works.html', bg: '#eefafa' },
 ];
 
 const genericWork = (alt) => ({
@@ -705,6 +691,9 @@ function buildSticker(sprite, opts) {
   return el;
 }
 
+const escHTML = (s) => String(s).replace(/[&<>"]/g, (c) => (
+  { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
 function buildPhoto(data, opts) {
   const el = document.createElement('a');
   el.className = 'photo-card';
@@ -715,9 +704,13 @@ function buildPhoto(data, opts) {
   el.style.left = opts.x + 'px';
   el.style.top = opts.y + 'px';
   el.style.zIndex = opts.z;
+  const ext = data.external
+    ? '<span class="photo-ext" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span>'
+    : '';
   el.innerHTML =
     `<span class="photo-img" style="background:${data.bg}"><span class="photo-emoji">${data.emoji}</span></span>` +
-    `<span class="photo-cap">${data.cap}${data.external ? ' ↗' : ''}</span>`;
+    `<span class="photo-cap">${escHTML(data.cap)}</span>` + ext;
+  if (data.external) el.setAttribute('aria-label', `${data.cap}（外部サイトを開く）`);
   if (data.img) {
     const img = document.createElement('img');
     img.alt = '';
@@ -1223,7 +1216,7 @@ async function build({ intro }) {
 
   // 写真のスポットは互いに離れた場所を選ぶ（足りなければ余りから充当）
   const minPhotoDist = Math.min(worldW, worldH) / 3.5;
-  const photos = window.CMS_ONLY ? [] : PHOTOS; // 記事写真はCMS管理外なので、CMSのみ表示では出さない
+  const photos = PHOTOS; // CMSのみ表示でCMSに無ければ空（loadCMSContent）
   const photoSpots = [];
   const shuffled = shuffle(spots);
   for (const p of shuffled) {
@@ -1491,14 +1484,11 @@ async function loadCMSContent() {
   const works = await window.getWorks();
   STICKERS = works.filter((w) => w.image).map(stickerOfWork);
 
-  // 壁の写真のうち自社事例のもの（href: './works.html'）は、
-  // キャプションと同名の事例ページへ送る。該当が無ければWORKs一覧へ
-  const byTitle = new Map(works.map((w) => [w.title, w]));
-  PHOTOS.forEach((p) => {
-    if (p.href !== './works.html') return;
-    const w = byTitle.get(p.cap);
-    p.href = w ? window.workURL(w) : './index.html#works';
-  });
+  // 外部リンクの写真カード → microCMS fv-links。無ければ既定（K,D,C,,,記事）、
+  // CMSのみ表示では既定値を出さない
+  const links = await window.getFvLinks();
+  if (links.length) PHOTOS = links;
+  else if (window.CMS_ONLY) PHOTOS = [];
 }
 
 /* ==========================================================
@@ -1509,6 +1499,8 @@ async function loadCMSContent() {
    ========================================================== */
 
 const SUBSTACK_URL = 'https://substack.studioholiday.jp/';
+
+const TICKER_POSTS = 5; // 電光掲示板に流す最新記事の数
 
 async function fetchSubstackPosts() {
   const get = async (url) => {
@@ -1526,7 +1518,7 @@ async function fetchSubstackPosts() {
   // 1) GitHub Actionsが日次生成する data/newsletter.json（同一オリジンなので最も確実）
   try {
     const posts = (await (await get('./data/newsletter.json')).json()).posts;
-    if (posts && posts.length) return posts.slice(0, 10);
+    if (posts && posts.length) return posts.slice(0, TICKER_POSTS);
   } catch { /* 次の手段へ */ }
 
   // 2) フィードを直接取得（SubstackがCORSを許可した場合に将来有効になる保険）
@@ -1539,7 +1531,7 @@ async function fetchSubstackPosts() {
         url: item.querySelector('link')?.textContent.trim() || SUBSTACK_URL,
       }))
       .filter((p) => p.title);
-    if (posts.length) return posts.slice(0, 10);
+    if (posts.length) return posts.slice(0, TICKER_POSTS);
   } catch (e) {
     console.warn('[substack] フィード取得に失敗。仮タイトルのまま表示します:', e);
   }
