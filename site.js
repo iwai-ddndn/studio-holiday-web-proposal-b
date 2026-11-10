@@ -27,6 +27,8 @@
  * CMSで足りていない所がそのまま見える（見た目の確認用）。画面右下に件数のバッジが出る */
 const CMS_ONLY = /[?&]cms=only\b/.test(location.search);
 window.CMS_ONLY = CMS_ONLY;
+// 先にクラスを付けて、CMS外（data-local）のメンバーが一瞬見えるのを防ぐ
+if (CMS_ONLY) document.documentElement.classList.add('is-cms-only');
 
 const WORKS_FALLBACK = [
   { slug: 'smeedy', title: 'スミーディ', kind: 'キャラクターデザイン', client: '住友電気工業',
@@ -634,7 +636,7 @@ async function initCmsOnly() {
     '<strong>microCMSのデータだけで表示中</strong>' +
     `<span>事例 ${works.length}件（ステッカー画像あり ${withImg}件・壁に出るのはこの${withImg}件）</span>` +
     `<span>メンバー ${members ? members.length : '取得失敗'}${members ? '件' : ''}</span>` +
-    '<span>壁の記事写真・サンプルメンバーは非表示</span>' +
+    '<span>CMSに無い仮の記事カード・サンプルメンバーは非表示</span>' +
     `<a href="${location.pathname}">通常表示に戻る</a>`;
   document.body.appendChild(badge);
 }
