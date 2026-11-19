@@ -157,6 +157,7 @@ function normalizeWorks(contents) {
       description: c.description || '',
       body: c.body || '', // リッチエディタ本文（詳細ページの記事本文）
       credit: c.credit || (local ? local.credit || '' : ''), // 「役割: 名前」を改行区切りで
+      tags: c.tags || (local ? local.tags || '' : ''), // タグを1行に1つ、改行区切りで（未入力なら client・kind）
       // imgix変換で幅を抑えつつPNG化（切り抜きの透過を保持）
       image: c.sticker && c.sticker.url ? `${c.sticker.url}?w=1000&fm=png` : (local ? local.image : ''),
       // TOP壁ステッカーの見た目（台紙の色・素材）。未入力なら白台紙・通常
@@ -218,6 +219,7 @@ function workCard(w) {
   const el = document.createElement('a');
   el.className = 'work-card';
   el.href = window.workURL(w);
+  const cardTags = workTags(w);
   el.innerHTML =
     `<span class="work-card-visual">${
       w.image ? `<img src="${esc(w.image)}" alt="" loading="lazy" />` : '<span class="work-card-noimg" aria-hidden="true">STUDIO HOLIDAY</span>'
@@ -226,8 +228,8 @@ function workCard(w) {
       (w.kind ? `<span class="work-card-kind">${esc(w.kind)}</span>` : '') +
       `<span class="work-card-title">${esc(w.title)}</span>` +
       (w.client ? `<span class="work-card-client">${esc(w.client)}</span>` : '') +
-      // TOPのカード（Figma workcard）は「#クライアント #ジャンル」のタグで見せる
-      ((w.client || w.kind) ? `<span class="work-card-tags">${[w.client, w.kind].filter(Boolean).map((t) => `<span>#${esc(t)}</span>`).join('')}</span>` : '') +
+      // TOPのカード（Figma workcard）はタグで見せる（tags 未入力なら「#クライアント #ジャンル」）
+      (cardTags.length ? `<span class="work-card-tags">${cardTags.map((t) => `<span>#${esc(t)}</span>`).join('')}</span>` : '') +
       `<span class="work-card-arrow" aria-hidden="true">${ARROW_SVG}</span>` +
     '</span>';
   return el;
@@ -245,6 +247,15 @@ function workCreditHTML(w) {
       : `<div><dt></dt><dd>${esc(line)}</dd></div>`;
   });
   return `<aside class="work-credit"><h2>CREDIT</h2><dl>${items.join('')}</dl></aside>`;
+}
+
+/* タグ: microCMSの tags（テキストエリア）に1行1タグで書く。表示側で先頭に「#」を付けるので、
+ * 入力済みの「#」は外して二重にしない。tags が空なら従来どおり [クライアント, ジャンル] */
+function workTags(w) {
+  const rows = String(w.tags || '').split(/\r?\n/)
+    .map((s) => s.trim().replace(/^[#＃]+\s*/, '').trim())
+    .filter(Boolean);
+  return rows.length ? rows : [w.client, w.kind].filter(Boolean);
 }
 
 /* 関連事例: 同じジャンル > 同じクライアント > それ以外 の順に n 件 */
@@ -364,7 +375,7 @@ async function initWorkDetail() {
   } catch { /* file:// 直開き等はそのままJS描画 */ }
 
   document.title = `${work.title} — WORKs | STUDIO HOLIDAY`;
-  const tags = [work.client, work.kind].filter(Boolean);
+  const tags = workTags(work);
   const { html: bodyHTML, isDraft } = await window.workBody(work);
   root.innerHTML =
     '<a class="work-back" href="./index.html#works">← WORKs一覧</a>' +
