@@ -441,8 +441,9 @@ function getSprites() {
  * 反発の停止距離 GAP=0.88 は「隣とわずかに隙間」の下限保証。
  * excl: 中央の「Design & Deploy Partner」の文字を空けておく楕円。
  */
-function layoutStickers(W, H, unit, excl) {
-  const cell = unit * PARAMS.gap; // グリッド間隔（＝ステッカー間の距離感）
+function layoutStickers(W, H, unit, excl, density = 1) {
+  // グリッド間隔（＝ステッカー間の距離感）。density>1 はスポット不足時のみ使う
+  const cell = (unit * PARAMS.gap) / density;
   const cols = Math.max(3, Math.round(W / cell));
   const rows = Math.max(3, Math.round(H / cell));
   const cellW = W / cols;
@@ -511,20 +512,24 @@ function layoutStickers(W, H, unit, excl) {
   return items;
 }
 
-/* 各絵柄を必ず2枚、約半数だけ3枚にして、同一絵柄の出現を2〜3枚に制限する */
+/* 各絵柄を必ず2枚、約半数だけ3枚にして、同一絵柄の出現を2〜3枚に制限する。
+ * 並びは「全絵柄1枚ずつ（シャッフル）」を先頭に確保し、その後ろに余分のコピー
+ * （シャッフル）を続ける。スポットが足りず末尾が切られても、欠けるのは余分の
+ * コピーだけで、どの事例も最低1枚は必ず壁に出る（issue #17）。 */
 function artSequence(sprites) {
-  const seq = sprites.flatMap((sprite) => {
+  const extras = sprites.flatMap((sprite) => {
     const copies = Math.random() < 0.5 ? 2 : 3;
-    return Array.from({ length: copies }, () => sprite);
+    return Array.from({ length: copies - 1 }, () => sprite);
   });
-  return shuffle(seq);
+  return [...shuffle(sprites), ...shuffle(extras)];
 }
 
 /* 表示枚数が少ないほど中央寄りの狭い候補だけを残し、寂しい散らばりを防ぐ。
- * 枚数が増えれば候補数も増えるため、自然に外側へ広がる。 */
-function centralSpotPool(candidates, count, focus) {
+ * 枚数が増えれば候補数も増えるため、自然に外側へ広がる。
+ * minCount: 最低限残す候補数（全事例を1枚ずつ置ける数）。 */
+function centralSpotPool(candidates, count, focus, minCount = 0) {
   const extraSpots = Math.max(6, Math.ceil(Math.sqrt(count) * 1.5));
-  const poolSize = Math.min(candidates.length, count + extraSpots);
+  const poolSize = Math.min(candidates.length, Math.max(minCount, count + extraSpots));
   return candidates
     .map((p) => ({
       p,
@@ -1215,31 +1220,36 @@ async function build({ intro }) {
   const base = vw < 560 ? 150 : vw < 900 ? 190 : 235;
   const unit = base * PARAMS.size;
   const excl = { cx: worldW / 2, cy: worldH / 2, rx: vw * 0.40, ry: vh * 0.28 };
-  const spots = layoutStickers(worldW, worldH, unit, excl);
-
   // 写真のスポットは互いに離れた場所を選ぶ（足りなければ余りから充当）
   const minPhotoDist = Math.min(worldW, worldH) / 3.5;
   const photos = PHOTOS; // CMSのみ表示でCMSに無ければ空（loadCMSContent）
-  const photoSpots = [];
-  const shuffled = shuffle(spots);
-  for (const p of shuffled) {
-    if (photoSpots.length >= photos.length) break;
-    if (photoSpots.every((q) => Math.hypot(p.x - q.x, p.y - q.y) >= minPhotoDist)) {
-      photoSpots.push(p);
+  // 全事例を最低1枚ずつ置けるだけのステッカースポットを確保する（issue #17）。
+  // 通常は density=1 の1回で足りる。不足する時だけグリッドを少しずつ細かくして作り直す
+  let spots, photoSpots, availableStickerSpots;
+  for (let density = 1; ; density *= 1.12) {
+    spots = layoutStickers(worldW, worldH, unit, excl, density);
+    photoSpots = [];
+    const shuffled = shuffle(spots);
+    for (const p of shuffled) {
+      if (photoSpots.length >= photos.length) break;
+      if (photoSpots.every((q) => Math.hypot(p.x - q.x, p.y - q.y) >= minPhotoDist)) {
+        photoSpots.push(p);
+      }
     }
+    for (const p of shuffled) {
+      if (photoSpots.length >= photos.length) break;
+      if (!photoSpots.includes(p)) photoSpots.push(p);
+    }
+    availableStickerSpots = spots.filter((p) => !photoSpots.includes(p));
+    if (availableStickerSpots.length >= sprites.length || density > 4) break;
   }
-  for (const p of shuffled) {
-    if (photoSpots.length >= photos.length) break;
-    if (!photoSpots.includes(p)) photoSpots.push(p);
-  }
-  const availableStickerSpots = spots.filter((p) => !photoSpots.includes(p));
   const arts = sprites.length ? artSequence(sprites) : [];
   const centralStickerSpots = centralSpotPool(availableStickerSpots, arts.length, {
     cx: worldW / 2,
     cy: worldH / 2,
     rx: vw,
     ry: vh,
-  });
+  }, sprites.length);
   const stickerSpots = selectDistributedSpots(centralStickerSpots, arts.length, photoSpots);
   const total = stickerSpots.length + photoSpots.length;
 
