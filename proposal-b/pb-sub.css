@@ -32,6 +32,17 @@
   rotate: var(--tilt, 0deg);
 }
 .pb-sub .page-hero .sticker-head img { filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.16)); }
+/* 事業ページ: ヒーローに写真（3事業サムネイル）を敷く。見出しステッカーは写真の上に */
+.pb-sub .page-hero--photo {
+  background: #1a1a1a var(--hero-img) center / cover no-repeat;
+}
+.pb-sub .page-hero--photo .sticker-head img { filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.35)); }
+/* 写真の上でも読めるよう、左下ラベルと右下SCROLLを白い札に */
+.pb-sub .page-hero--photo .pb-hero-caption,
+.pb-sub .page-hero--photo .pb-hero-scroll { background: var(--white); border-radius: 999px; }
+.pb-sub .page-hero--photo .pb-hero-caption { padding: 8px 16px 8px 12px; }
+.pb-sub .page-hero--photo .pb-hero-caption i { width: 24px; }
+.pb-sub .page-hero--photo .pb-hero-scroll { padding: 14px 8px 0; border-radius: 999px 999px 0 0; }
 /* ヒーローに散らすステッカー（pb-sub.js が差し込む・飾り） */
 .pb-sub .page-hero .pb-floater { z-index: 1; }
 /* 左下のパンくず風ラベルと右下のスクロール表示（飾り） */

@@ -56,7 +56,9 @@
     ];
     // ページごとに違う組み合わせ（URLから決める）
     let seed = [...location.pathname].reduce((a, c) => a + c.charCodeAt(0), 0);
-    const floaters = SLOTS.map((slot) => {
+    // 写真を敷いた事業ページ（.page-hero--photo）は、写真が主役なので飾りのステッカーを散らさない
+    const slots = hero.classList.contains('page-hero--photo') ? [] : SLOTS;
+    const floaters = slots.map((slot) => {
       const img = document.createElement('img');
       img.className = 'pb-floater';
       img.src = asset(POOL[seed++ % POOL.length]);
