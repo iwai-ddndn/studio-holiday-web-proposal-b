@@ -526,7 +526,7 @@ body {
 .work-drawer .wd-visual.is-pasting img { animation: rvStickerPaste 0.75s cubic-bezier(0.2, 0.8, 0.25, 1) 0.25s both; }
 .work-drawer .wd-main { width: min(600px, calc(100% - 48px)); margin-top: 110px; padding-bottom: 0; }
 .work-drawer .wd-main--head { padding-bottom: 48px; }
-.work-drawer .wd-main--body { margin-top: 0; padding: 8px 0 88px; }
+.work-drawer .wd-main--body { margin-top: 0; padding: 0 0 56px; }
 .work-drawer .wd-main--body > .work-body,
 .work-drawer .wd-main--body > .work-note { margin-top: 40px; }
 .work-drawer .wd-main h1 { font-size: clamp(32px, 3.4vw, 52px); }
@@ -536,8 +536,8 @@ body {
 .work-drawer .wd-main .work-body h3 { margin: 40px 0 16px; font-size: 22px; }
 .work-drawer .work-credit { max-width: none; margin-top: 48px; }
 .work-drawer .work-credit dt { width: 128px; font-size: 12px; }
-/* 本文の上に挟むコンパクトな帯（見出し・カードとも小さめ） */
-.work-drawer .wd-related { padding: 32px 24px 36px; }
+/* 本文・クレジットの下に置くコンパクトな帯（見出し・カードとも小さめ）。パネルの末尾なので下余白は広め */
+.work-drawer .wd-related { padding: 32px 24px 64px; }
 .work-drawer .wd-related[hidden] { display: none; }
 .work-drawer .wd-related h2 { margin-bottom: 24px; font-size: 20px; }
 .work-drawer .works-board .works-grid { grid-template-columns: repeat(3, minmax(0, 170px)); max-width: none; gap: 14px; }
