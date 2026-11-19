@@ -36,16 +36,24 @@
   /* ==========================================================
      ▼ 取引先の一覧からマーキー用の2段を組む（上下で逆向き・ずらした順番）
      ========================================================== */
-  const clients = $$('.pb-clients-list li').map((li) => li.textContent.trim());
-  const rows = $$('.pb-clients-row .pb-band-track');
-  if (clients.length && rows.length === 2) {
+  // まず静的なリストで組み、microCMS の clients で描き直されたら（site.js の window.clientsReady）
+  // 同じ手順で組み直す。マーキー組み立て後（PB.finish 後）は PB.marqueeRefill で中身だけ差し替える
+  const escHTML = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const buildClientsMarquee = () => {
+    const clients = $$('.pb-clients-list li').map((li) => li.textContent.trim()).filter(Boolean);
+    const rows = $$('.pb-clients-row');
+    if (!clients.length || rows.length !== 2) return;
     const half = Math.ceil(clients.length / 2);
     const orders = [clients, clients.slice(half).concat(clients.slice(0, half))];
     rows.forEach((row, i) => {
-      row.innerHTML = orders[i].map((c) => `<span>${c}</span>`).join('');
+      PB.marqueeRefill(row, orders[i].map((c) => `<span>${escHTML(c)}</span>`).join(''));
     });
     $('.pb-company').classList.add('pb-clients-ready');
-  }
+  };
+  buildClientsMarquee();
+  window.clientsReady?.then((updated) => {
+    if (updated) buildClientsMarquee();
+  });
 
   $$('[data-paste]').forEach((el) => PB.paste(el));
 

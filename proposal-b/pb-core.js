@@ -138,6 +138,16 @@
 
   /* ---------- マーキー: スクロールの向きと速さで流れが変わる ---------- */
   const marquees = [];
+  // 1セットが枠より広くなるまで中身を足し、2セット並べて継ぎ目なくループさせる
+  const fillMarquee = (box, track, set) => {
+    const unit = set.innerHTML;
+    let guard = 0;
+    while (set.offsetWidth < box.offsetWidth + 200 && guard++ < 12) set.insertAdjacentHTML('beforeend', unit);
+    track.querySelectorAll('.pb-set').forEach((s) => { if (s !== set) s.remove(); });
+    const clone = set.cloneNode(true);
+    clone.setAttribute('aria-hidden', 'true');
+    track.appendChild(clone);
+  };
   PB.marquee = (box) => {
     const track = $('.pb-band-track', box);
     if (!track || box.dataset.marqueeReady) return;
@@ -151,14 +161,20 @@
     track.style.gap = '0';
     track.style.paddingRight = '0';
     track.appendChild(set);
-    // 1セットが枠より広くなるまで中身を足し、2セット並べて継ぎ目なくループさせる
-    const unit = set.innerHTML;
-    let guard = 0;
-    while (set.offsetWidth < box.offsetWidth + 200 && guard++ < 12) set.insertAdjacentHTML('beforeend', unit);
-    const clone = set.cloneNode(true);
-    clone.setAttribute('aria-hidden', 'true');
-    track.appendChild(clone);
+    fillMarquee(box, track, set);
     marquees.push({ track, set, dir: Number(box.dataset.marquee) || 1, x: 0, w: set.offsetWidth });
+  };
+  // 組み立て済みのマーキーの中身を差し替える（非同期で届いたデータの反映用）。
+  // 未組み立てなら track に入れておくだけで、PB.finish の PB.marquee が拾う
+  PB.marqueeRefill = (box, html) => {
+    const track = $('.pb-band-track', box);
+    if (!track) return;
+    const m = marquees.find((o) => o.track === track);
+    if (!m) { track.innerHTML = html; return; }
+    m.set.innerHTML = html;
+    fillMarquee(box, track, m.set);
+    m.x = 0;
+    m.w = m.set.offsetWidth;
   };
   addEventListener('resize', () => marquees.forEach((m) => { m.w = m.set.offsetWidth; }));
   PB.bands = [];
