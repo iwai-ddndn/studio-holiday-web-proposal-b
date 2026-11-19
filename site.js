@@ -139,6 +139,29 @@ window.getFvLinks = async () => {
     }));
 };
 
+/* 案BのTOP COMPANY「主な取引先」（microCMS clients: name / order）。
+ * 取得できた場合だけ .pb-clients-list を作り直す。order の昇順（未入力は後ろ・取得順を維持）。
+ * API未作成・取得失敗・0件なら、HTMLの静的リストのまま。
+ * 作り直したら true で解決する（pb.js がこれを待ってマーキーを組み直す） */
+window.clientsReady = (async () => {
+  const list = document.querySelector('.pb-clients-list');
+  if (!list) return false;
+  const contents = await fetchCMS('clients');
+  const orderOf = (c) => (typeof c.order === 'number' && Number.isFinite(c.order) ? c.order : Infinity);
+  const names = (contents || [])
+    .map((c, i) => ({ name: String(c.name || '').trim(), order: orderOf(c), i }))
+    .filter((c) => c.name)
+    .sort((a, b) => (a.order === b.order ? a.i - b.i : a.order - b.order))
+    .map((c) => c.name);
+  if (!names.length) return false;
+  list.replaceChildren(...names.map((name) => {
+    const li = document.createElement('li');
+    li.textContent = name;
+    return li;
+  }));
+  return true;
+})();
+
 /* CMSのコンテンツを、サイト内で使う共通の形に揃える。
  * CMSに画像が無ければ、タイトル一致でローカル素材を当てる
  * （メディアアップロードAPIが使えないプランでもテキストだけCMS管理できるようにするため）*/
