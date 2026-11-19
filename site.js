@@ -632,15 +632,40 @@ function initReveal() {
 
 const MEMBER_NAME_CYCLE = [['l', -6.16], ['s', 3.76], ['m', -1.79], ['r', 4.2]];
 
+/* microCMS members の「並び順」（order）を数値に。未入力・数値にならない値は null */
+function memberOrder(m) {
+  const v = m.order;
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  if (typeof v === 'string' && v.trim() !== '') {
+    const n = Number(v.trim());
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+
+/* order の昇順。order 未入力は後ろへ。同順位は取得順を維持（安定ソート） */
+function sortMembersByOrder(members) {
+  return members
+    .map((m, i) => ({ m, i, o: memberOrder(m) }))
+    .sort((a, b) => {
+      if (a.o !== null && b.o !== null && a.o !== b.o) return a.o - b.o;
+      if ((a.o === null) !== (b.o === null)) return a.o === null ? 1 : -1;
+      return a.i - b.i;
+    })
+    .map((x) => x.m);
+}
+
 /* 案BのTOPのMEMBERS（静的に生成済み・サンプル入り）を、microCMS members の中身で描き直す */
 function renderCmsMembers(members) {
   const list = document.querySelector('.pb-members-list');
   if (!list) return;
   const root = './'; // 案BのTOP（index-b.html）はサイトのルートにある
   list.innerHTML = '';
-  const valid = members
-    .map((m) => ({ ...m, slug: m.slug || m.id }))
-    .filter((m) => m.slug && m.name && m.photo && m.photo.url);
+  const valid = sortMembersByOrder(
+    members
+      .map((m) => ({ ...m, slug: m.slug || m.id }))
+      .filter((m) => m.slug && m.name && m.photo && m.photo.url),
+  );
   if (!valid.length) {
     const li = document.createElement('li');
     li.className = 'cms-only-empty';
