@@ -232,14 +232,22 @@ function stickerLookOf(c) {
 }
 window.stickerLookOf = stickerLookOf;
 
-/* 事例のタグ一覧。microCMSの tags（テキストエリア）に1行1タグで書く。
- * 行頭の「#」は付けても付けなくてもよい（表示側で付ける）。
- * 未入力なら従来どおり [クライアント, ジャンル] */
-function workTags(w) {
-  const lines = String((w && w.tags) || '').split(/\r?\n/)
-    .map((s) => s.trim().replace(/^[#＃]+\s*/, ''))
+/* タグ文字列を個別のタグに分ける。区切りは改行と全角スペース。
+ * 「#My Project」のようにタグ内に半角スペースを含むことがあるので、半角スペースでは分けない。
+ * 先頭の「#」「＃」は付けても付けなくてもよい（表示側で付ける） */
+function splitTags(s) {
+  return String(s || '').split(/\r?\n|　/)
+    .map((t) => t.trim().replace(/^[#＃]+\s*/, ''))
     .filter(Boolean);
-  return lines.length ? lines : [w && w.client, w && w.kind].filter(Boolean);
+}
+
+/* 事例のタグ一覧。microCMSの tags（テキストエリア）があればそれを優先。
+ * 未入力なら [クライアント, ...ジャンル（kind を改行・全角スペースで分割）] */
+function workTags(w) {
+  if (!w) return [];
+  const tags = splitTags(w.tags);
+  if (tags.length) return tags;
+  return [String(w.client || '').trim(), ...splitTags(w.kind)].filter(Boolean);
 }
 window.workTags = workTags; // FVのステッカー帯・ドロワー（main.js）でも使う
 
@@ -450,6 +458,51 @@ async function initWorkDetail() {
     g.dataset.worksKind = work.kind || '';
     g.dataset.worksClient = work.client || '';
   });
+}
+
+/* ==========================================================
+   ▼ 事例詳細の恒久ページ（b/works/<id>/、生成済みの静的HTML）のタグ再描画
+   生成時のタグは [client, kind] をそのまま入れているため、kind の改行・全角スペース区切りが
+   1つのピルに潰れている。CMSの事例データから workTags() で組み直す。
+   ========================================================== */
+
+/* パスから works の直後のセグメント（事例の id / slug）を取り出す */
+function workKeyFromPath(pathname) {
+  const segs = String(pathname || '').split('/').filter(Boolean);
+  const i = segs.lastIndexOf('works');
+  if (i < 0 || !segs[i + 1]) return '';
+  try { return decodeURIComponent(segs[i + 1]); } catch { return segs[i + 1]; }
+}
+
+async function initStaticWorkTags() {
+  const box = document.querySelector('.wd-tags');
+  if (!box) return;
+  try {
+    const works = await window.getWorks();
+    if (!works || !works.length) return;
+    const find = (key) => (key ? works.find((w) => w.id === key || w.slug === key) : null);
+
+    const work = find(workKeyFromPath(location.pathname));
+    const tags = work ? workTags(work) : [];
+    if (tags.length) box.innerHTML = tags.map((t) => `<li>#${esc(t)}</li>`).join('');
+
+    // 関連事例カード（href は ../<slug>/ 形式）
+    document.querySelectorAll('a.work-card').forEach((card) => {
+      const tagBox = card.querySelector('.work-card-tags');
+      const href = card.getAttribute('href');
+      if (!tagBox || !href) return;
+      const m = href.match(/^\.\.\/([^/?#]+)\/?/);
+      let key = '';
+      if (m) {
+        try { key = decodeURIComponent(m[1]); } catch { key = m[1]; }
+      }
+      const w = find(key);
+      const cardTags = w ? workTags(w) : [];
+      if (cardTags.length) tagBox.innerHTML = cardTags.map((t) => `<span>#${esc(t)}</span>`).join('');
+    });
+  } catch (e) {
+    console.warn('[works] 事例詳細ページのタグ再描画に失敗:', e);
+  }
 }
 
 /* ==========================================================
@@ -729,6 +782,7 @@ async function initCmsOnly() {
 // 詳細ページは自分自身を除外してからカードを描きたいので、順番に実行する
 initWorkDetail().then(initWorksGrids);
 initCmsOnly();
+initStaticWorkTags();
 initFooterWorks();
 initMobileNav();
 initHScroll();
