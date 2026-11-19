@@ -165,6 +165,8 @@ function normalizeWorks(contents) {
       // TOP壁で中央付近に優先表示するか（microCMSの真偽値 centerPriority「中央に優先表示」）。
       // CMSにフィールドが無ければローカルのタイトル一致 → 無ければ false（従来どおり）
       centerPriority: isFlagOn(c.centerPriority != null ? c.centerPriority : (local ? local.centerPriority : false)),
+      // TOPの WORKs で先頭に優先表示する（microCMS の真偽値 topPriority。未設定なら false）
+      topPriority: isFlagOn(c.topPriority),
     };
   });
 }
@@ -219,7 +221,9 @@ function workTags(w) {
 window.workTags = workTags; // FVのステッカー帯・ドロワー（main.js）でも使う
 
 const localWorks = () => WORKS_FALLBACK.map((w) => ({
-  ...w, id: w.slug, body: '', centerPriority: isFlagOn(w.centerPriority),
+  ...w, id: w.slug, body: '',
+  centerPriority: isFlagOn(w.centerPriority),
+  topPriority: isFlagOn(w.topPriority),
 }));
 
 /* works は FV・カード一覧・フッター・詳細ページで使うので、リクエストは1回だけにする */
@@ -295,6 +299,7 @@ window.workDrawerExtras = async (work) => {
 /* grid の data属性:
  *   data-works-limit    … 表示件数の上限（未指定なら全件）
  *   data-works-more     … 先頭 data-works-initial 件のあとに置く「全て見る」リンク（TOP用・WORKS一覧へ）
+ *                         このグリッドでは topPriority の作品を先頭に並べる
  *   data-works-exclude  … 除外する事例のid（詳細ページで自分自身を出さない） */
 function renderWorksGrid(grid, works) {
   const exclude = grid.dataset.worksExclude || '';
@@ -303,6 +308,10 @@ function renderWorksGrid(grid, works) {
     // 事例ページの「関連する事例」: 同ジャンル・同クライアントを先頭へ（それ以外は元の順のまま）
     const ref = { kind: grid.dataset.worksKind, client: grid.dataset.worksClient };
     list = window.relatedWorks(ref, list, list.length);
+  }
+  if (grid.dataset.worksMore !== undefined) {
+    // TOPのみ: topPriority の作品を先頭へ（安定ソート。優先同士・それ以外同士は取得順のまま）
+    list = [...list.filter((w) => w.topPriority), ...list.filter((w) => !w.topPriority)];
   }
   const limit = Number(grid.dataset.worksLimit) || 0;
   if (limit) list = list.slice(0, limit);
