@@ -154,6 +154,7 @@ function normalizeWorks(contents) {
       title: c.title || '',
       kind: c.kind || '',
       client: c.client || '',
+      tags: c.tags || '', // タグ（テキストエリア・1行1タグ）。表示は workTags() 経由で
       description: c.description || '',
       body: c.body || '', // リッチエディタ本文（詳細ページの記事本文）
       credit: c.credit || (local ? local.credit || '' : ''), // 「役割: 名前」を改行区切りで
@@ -192,6 +193,17 @@ function stickerLookOf(c) {
 }
 window.stickerLookOf = stickerLookOf;
 
+/* 事例のタグ一覧。microCMSの tags（テキストエリア）に1行1タグで書く。
+ * 行頭の「#」は付けても付けなくてもよい（表示側で付ける）。
+ * 未入力なら従来どおり [クライアント, ジャンル] */
+function workTags(w) {
+  const lines = String((w && w.tags) || '').split(/\r?\n/)
+    .map((s) => s.trim().replace(/^[#＃]+\s*/, ''))
+    .filter(Boolean);
+  return lines.length ? lines : [w && w.client, w && w.kind].filter(Boolean);
+}
+window.workTags = workTags; // FVのステッカー帯・ドロワー（main.js）でも使う
+
 const localWorks = () => WORKS_FALLBACK.map((w) => ({ ...w, id: w.slug, body: '' }));
 
 /* works は FV・カード一覧・フッター・詳細ページで使うので、リクエストは1回だけにする */
@@ -227,7 +239,7 @@ function workCard(w) {
       `<span class="work-card-title">${esc(w.title)}</span>` +
       (w.client ? `<span class="work-card-client">${esc(w.client)}</span>` : '') +
       // TOPのカード（Figma workcard）は「#クライアント #ジャンル」のタグで見せる
-      ((w.client || w.kind) ? `<span class="work-card-tags">${[w.client, w.kind].filter(Boolean).map((t) => `<span>#${esc(t)}</span>`).join('')}</span>` : '') +
+      (workTags(w).length ? `<span class="work-card-tags">${workTags(w).map((t) => `<span>#${esc(t)}</span>`).join('')}</span>` : '') +
       `<span class="work-card-arrow" aria-hidden="true">${ARROW_SVG}</span>` +
     '</span>';
   return el;
@@ -364,7 +376,7 @@ async function initWorkDetail() {
   } catch { /* file:// 直開き等はそのままJS描画 */ }
 
   document.title = `${work.title} — WORKs | STUDIO HOLIDAY`;
-  const tags = [work.client, work.kind].filter(Boolean);
+  const tags = workTags(work);
   const { html: bodyHTML, isDraft } = await window.workBody(work);
   root.innerHTML =
     '<a class="work-back" href="./index.html#works">← WORKs一覧</a>' +
