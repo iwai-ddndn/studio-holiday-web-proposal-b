@@ -336,7 +336,7 @@
       document.addEventListener('pointerover', (e) => {
         const t = e.target;
         if (t.closest('.work-drawer')) return setState(t.closest('a, button') ? 'is-link' : '');
-        if (t.closest('.work-card, .pb-biz-card, .pb-member-link, .member-link, .biz-link, .sticker, .photo-card')) return setState('is-big is-view', 'VIEW');
+        if (t.closest('.work-card, .pb-member-link, .member-link, .biz-link, .sticker, .photo-card')) return setState('is-big is-view', 'VIEW');
         if (t.closest('a, button')) return setState('is-link');
         if (t.closest('.pb-members-track')) return setState('is-big', 'SCROLL');
         if (hero && t.closest('#hero') && hero.classList.contains('can-pan')) return setState('is-big', 'DRAG');
