@@ -29,7 +29,8 @@ const stickerOfWork = (w) => ({
   alt: w.title,
   client: w.client || '',
   // slug / body はドロワーで記事本文を出すために持ち回る（事例ページと同じ内容）
-  work: { kind: w.kind || '', title: w.title, desc: w.description || '', slug: w.slug, body: w.body || '' },
+  // tags はFVの帯・ドロワーのタグ表示用（window.workTags で解釈）
+  work: { kind: w.kind || '', title: w.title, desc: w.description || '', slug: w.slug, body: w.body || '', tags: w.tags || '' },
   // 台紙の色・素材（microCMSの stickerBase / stickerColor / stickerFinish。フォールバックは白・通常）
   look: w.stickerLook || window.stickerLookOf(w),
 });
@@ -750,7 +751,9 @@ let ambientHoldTimer = 0;
 
 function tagTextOf(sprite) {
   const w = sprite.work || {};
-  return [sprite.client, w.kind, w.title].filter(Boolean).map((t) => `#${t}`).join('　');
+  // タグ一覧（CMSの tags。未入力なら クライアント・ジャンル）＋ タイトル
+  const tags = window.workTags({ ...w, client: sprite.client });
+  return [...tags, w.title].filter(Boolean).map((t) => `#${t}`).join('　');
 }
 
 function showTagsFor(el) {
@@ -902,10 +905,10 @@ function openModal(work, imgURL, client) {
   pageLink.href = work.slug ? window.workURL(work) : './works/';
   pageLink.querySelector('span').textContent = work.slug ? 'この事例のページを開く' : 'WORKS一覧を見る';
   showDrawerBody(work); // 記事本文（事例ページと同じ内容）
-  // タグは作品詳細ページと同じ「#クライアント #ジャンル」
+  // タグは作品詳細ページと同じ（CMSの tags。未入力なら「#クライアント #ジャンル」）
   const tags = document.getElementById('drawerTags');
   tags.innerHTML = '';
-  [client, work.kind].filter(Boolean).forEach((t) => {
+  window.workTags({ ...work, client }).forEach((t) => {
     const li = document.createElement('li');
     li.textContent = `#${t}`;
     tags.appendChild(li);
@@ -950,7 +953,7 @@ drawer.addEventListener('click', async (e) => {
   // 壁に貼ってあるステッカー（白フチ入りの加工済み画像）があればそれを使う
   const sprite = (await getSprites()).find((s) => s.work && s.work.slug === w.slug);
   openModal(
-    { kind: w.kind, title: w.title, desc: w.description, slug: w.slug, body: w.body },
+    { kind: w.kind, title: w.title, desc: w.description, slug: w.slug, body: w.body, tags: w.tags },
     sprite ? sprite.url : w.image,
     w.client,
   );
