@@ -162,9 +162,23 @@ function normalizeWorks(contents) {
       image: c.sticker && c.sticker.url ? `${c.sticker.url}?w=1000&fm=png` : (local ? local.image : ''),
       // TOP壁ステッカーの見た目（台紙の色・素材）。未入力なら白台紙・通常
       stickerLook: stickerLookOf(c),
+      // TOP壁で中央付近に優先表示するか（microCMSの真偽値 centerPriority「中央に優先表示」）。
+      // CMSにフィールドが無ければローカルのタイトル一致 → 無ければ false（従来どおり）
+      centerPriority: isFlagOn(c.centerPriority != null ? c.centerPriority : (local ? local.centerPriority : false)),
     };
   });
 }
+
+/* 真偽値フィールドの返し方の揺れを吸収する（true / 'true' / 1 / '1' / 'on' / 'yes' / ['true'] など）。
+ * 未入力・false・'false' などは false */
+function isFlagOn(v) {
+  if (Array.isArray(v)) return v.some(isFlagOn);
+  if (typeof v === 'boolean') return v;
+  if (typeof v === 'number') return v !== 0;
+  const s = String(v == null ? '' : v).trim().toLowerCase();
+  return ['true', '1', 'on', 'yes', 'y', '中央に優先表示'].includes(s);
+}
+window.isFlagOn = isFlagOn;
 
 /* ステッカーの台紙・素材の指定を正規化する。
  * microCMSのセレクトは配列で返るので、配列・文字列のどちらでも受ける。
@@ -204,7 +218,9 @@ function workTags(w) {
 }
 window.workTags = workTags; // FVのステッカー帯・ドロワー（main.js）でも使う
 
-const localWorks = () => WORKS_FALLBACK.map((w) => ({ ...w, id: w.slug, body: '' }));
+const localWorks = () => WORKS_FALLBACK.map((w) => ({
+  ...w, id: w.slug, body: '', centerPriority: isFlagOn(w.centerPriority),
+}));
 
 /* works は FV・カード一覧・フッター・詳細ページで使うので、リクエストは1回だけにする */
 window.getWorks = () => (window.__worksPromise ??= (async () => {

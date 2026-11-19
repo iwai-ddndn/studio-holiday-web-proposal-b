@@ -33,6 +33,8 @@ const stickerOfWork = (w) => ({
   work: { kind: w.kind || '', title: w.title, desc: w.description || '', slug: w.slug, body: w.body || '', tags: w.tags || '' },
   // 台紙の色・素材（microCMSの stickerBase / stickerColor / stickerFinish。フォールバックは白・通常）
   look: w.stickerLook || window.stickerLookOf(w),
+  // 中央付近に優先表示（microCMSの centerPriority / WORKS_FALLBACK の centerPriority）
+  centerPriority: window.isFlagOn ? window.isFlagOn(w.centerPriority) : w.centerPriority === true,
 });
 
 let STICKERS = [];
@@ -415,7 +417,11 @@ const spriteOf = async (item) => {
   item.artPromise ??= loadArt(item);
   const art = await item.artPromise;
   const look = lookFor(item);
-  return art && { alt: item.alt, work: item.work, client: item.client, look, ...makeDiecutSprite(art, undefined, look) };
+  return art && {
+    alt: item.alt, work: item.work, client: item.client, look,
+    centerPriority: !!item.centerPriority,
+    ...makeDiecutSprite(art, undefined, look),
+  };
 };
 
 let spritesPromise = null;
@@ -571,12 +577,36 @@ function selectDistributedSpots(candidates, count, avoid = []) {
 
 /* 同じ絵柄のコピー同士ができるだけ離れるように、絵柄→スポットを割り当てる。
  * 各絵柄の1枚目はランダムなスポット、2枚目以降は「同じ絵柄の既配置」から
- * 最も遠い残りスポットを選ぶ（他の絵柄との距離は問わない）。 */
-function assignArtsToSpots(arts, spots) {
+ * 最も遠い残りスポットを選ぶ（他の絵柄との距離は問わない）。
+ * centerPriority の絵柄は、先に1枚目を「中央の文字エリア（focus＝除外楕円）の外側で
+ * 最も中央に近い残りスポット」へ割り当てる（スポット自体が楕円の外にあるので文字には被らない）。
+ * 優先指定が1件も無ければ、従来とまったく同じ処理になる。 */
+function assignArtsToSpots(arts, spots, focus) {
   const remaining = spots.slice();
   const placedByArt = new Map();
   const assignments = [];
-  for (const sprite of arts) {
+
+  // 優先絵柄の1枚目: 楕円で正規化した距離が小さい順に取る（僅差はわずかに揺らして毎回同じ並びにしない）
+  const prePlaced = new Set(); // arts 内のインデックス
+  if (focus && arts.some((s) => s.centerPriority)) {
+    const centerScore = (p) =>
+      Math.hypot((p.x - focus.cx) / focus.rx, (p.y - focus.cy) / focus.ry) + rand(0, 0.08);
+    const scored = remaining.map((p) => ({ p, score: centerScore(p) }));
+    arts.forEach((sprite, i) => {
+      if (!sprite.centerPriority || placedByArt.has(sprite) || !scored.length) return;
+      let bestI = 0;
+      for (let k = 1; k < scored.length; k++) if (scored[k].score < scored[bestI].score) bestI = k;
+      const [{ p: spot }] = scored.splice(bestI, 1);
+      remaining.splice(remaining.indexOf(spot), 1);
+      assignments.push({ sprite, spot });
+      placedByArt.set(sprite, [spot]);
+      prePlaced.add(i);
+    });
+  }
+
+  for (let ai = 0; ai < arts.length; ai++) {
+    if (prePlaced.has(ai)) continue;
+    const sprite = arts[ai];
     if (!remaining.length) break;
     const placed = placedByArt.get(sprite) || [];
     let bestI = 0;
@@ -1260,7 +1290,8 @@ async function build({ intro }) {
   const zOrder = shuffle([...Array(total).keys()]);
 
   // 同じ絵柄が近くに固まらないよう、絵柄→スポットを距離最大化で割り当てる
-  const assignments = assignArtsToSpots(arts, stickerSpots);
+  // centerPriority の事例は、1枚目を文字エリアのすぐ外（中央寄り）に優先して置く
+  const assignments = assignArtsToSpots(arts, stickerSpots, excl);
   assignments.forEach(({ sprite, spot: p }, i) => {
     const { w, h } = stickerDims(sprite, p.size);
     world.appendChild(buildSticker(sprite, {
