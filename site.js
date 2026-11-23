@@ -727,17 +727,22 @@ function sortMembersByOrder(members) {
     .map((x) => x.m);
 }
 
+/* 表示できるメンバー（slug（無ければコンテンツID）・名前・写真が揃ったもの）を order 順で */
+function validCmsMembers(members) {
+  return sortMembersByOrder(
+    (members || [])
+      .map((m) => ({ ...m, slug: m.slug || m.id }))
+      .filter((m) => m.slug && m.name && m.photo && m.photo.url),
+  );
+}
+
 /* 案BのTOPのMEMBERS（静的に生成済み・サンプル入り）を、microCMS members の中身で描き直す */
 function renderCmsMembers(members) {
   const list = document.querySelector('.pb-members-list');
   if (!list) return;
   const root = './'; // 案BのTOP（index-b.html）はサイトのルートにある
   list.innerHTML = '';
-  const valid = sortMembersByOrder(
-    members
-      .map((m) => ({ ...m, slug: m.slug || m.id }))
-      .filter((m) => m.slug && m.name && m.photo && m.photo.url),
-  );
+  const valid = validCmsMembers(members);
   if (!valid.length) {
     const li = document.createElement('li');
     li.className = 'cms-only-empty';
@@ -775,9 +780,23 @@ async function initCmsOnly() {
   document.body.appendChild(badge);
 }
 
+/* 通常ページの案B TOP MEMBERS: microCMS members を取得できたら .pb-members-list を描き直す
+ * （order の昇順・未入力は後ろ・同順位は取得順）。API未作成・取得失敗・有効なメンバー0件なら、HTMLの静的リストのまま。
+ * 描き直したら true で解決する（pb.js がこれを待って横スクロールを組み直す。clientsReady と同じ方式） */
+async function initMembers() {
+  if (!document.querySelector('.pb-members-list')) return false;
+  const members = await fetchCMS('members');
+  if (!validCmsMembers(members).length) return false;
+  renderCmsMembers(members);
+  return true;
+}
+
 // 詳細ページは自分自身を除外してからカードを描きたいので、順番に実行する
 initWorkDetail().then(initWorksGrids);
-initCmsOnly();
+// ?cms=only は initCmsOnly が（0件メッセージも含めて）描き直すので、その完了を待つ
+window.membersReady = CMS_ONLY
+  ? initCmsOnly().then(() => !!document.querySelector('.pb-members-list'), () => false)
+  : initMembers();
 initStaticWorkTags();
 initFooterWorks();
 initMobileNav();
