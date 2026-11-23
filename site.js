@@ -177,7 +177,6 @@ function normalizeWorks(contents) {
       title: c.title || '',
       kind: c.kind || '',
       client: c.client || '',
-      tags: c.tags || '', // タグ（テキストエリア・1行1タグ）。表示は workTags() 経由で
       description: c.description || '',
       body: c.body || '', // リッチエディタ本文（詳細ページの記事本文）
       credit: c.credit || (local ? local.credit || '' : ''), // 「役割: 名前」を改行区切りで
@@ -185,11 +184,11 @@ function normalizeWorks(contents) {
       image: c.sticker && c.sticker.url ? `${c.sticker.url}?w=1000&fm=png` : (local ? local.image : ''),
       // TOP壁ステッカーの見た目（台紙の色・素材）。未入力なら白台紙・通常
       stickerLook: stickerLookOf(c),
-      // TOP壁で中央付近に優先表示するか（microCMSの真偽値 centerPriority「中央に優先表示」）。
+      // FVキャンバス（TOPの壁）で中央寄りに優先表示するか（microCMSの真偽値 fvCenter「中央に優先表示」）。
       // CMSにフィールドが無ければローカルのタイトル一致 → 無ければ false（従来どおり）
-      centerPriority: isFlagOn(c.centerPriority != null ? c.centerPriority : (local ? local.centerPriority : false)),
-      // TOPの WORKs で先頭に優先表示する（microCMS の真偽値 topPriority。未設定なら false）
-      topPriority: isFlagOn(c.topPriority),
+      fvCenter: isFlagOn(c.fvCenter != null ? c.fvCenter : (local ? local.fvCenter : false)),
+      // TOPのWORKs一覧で先頭に表示するか（microCMS の真偽値 worksFirst。未設定なら false）
+      worksFirst: isFlagOn(c.worksFirst),
     };
   });
 }
@@ -241,20 +240,17 @@ function splitTags(s) {
     .filter(Boolean);
 }
 
-/* 事例のタグ一覧。microCMSの tags（テキストエリア）があればそれを優先。
- * 未入力なら [クライアント, ...ジャンル（kind を改行・全角スペースで分割）] */
+/* 事例のタグ一覧: [クライアント, ...ジャンル（kind を改行・全角スペースで分割）] */
 function workTags(w) {
   if (!w) return [];
-  const tags = splitTags(w.tags);
-  if (tags.length) return tags;
   return [String(w.client || '').trim(), ...splitTags(w.kind)].filter(Boolean);
 }
 window.workTags = workTags; // FVのステッカー帯・ドロワー（main.js）でも使う
 
 const localWorks = () => WORKS_FALLBACK.map((w) => ({
   ...w, id: w.slug, body: '',
-  centerPriority: isFlagOn(w.centerPriority),
-  topPriority: isFlagOn(w.topPriority),
+  fvCenter: isFlagOn(w.fvCenter), // FVキャンバスで中央寄りに優先表示
+  worksFirst: isFlagOn(w.worksFirst), // TOPのWORKs一覧で先頭に表示
 }));
 
 /* works は FV・カード一覧・フッター・詳細ページで使うので、リクエストは1回だけにする */
@@ -330,7 +326,7 @@ window.workDrawerExtras = async (work) => {
 /* grid の data属性:
  *   data-works-limit    … 表示件数の上限（未指定なら全件）
  *   data-works-more     … 先頭 data-works-initial 件のあとに置く「全て見る」リンク（TOP用・WORKS一覧へ）
- *                         このグリッドでは topPriority の作品を先頭に並べる
+ *                         このグリッドでは worksFirst（TOPのWORKs一覧で先頭に表示）の作品を先頭に並べる
  *   data-works-exclude  … 除外する事例のid（詳細ページで自分自身を出さない） */
 function renderWorksGrid(grid, works) {
   const exclude = grid.dataset.worksExclude || '';
@@ -341,8 +337,8 @@ function renderWorksGrid(grid, works) {
     list = window.relatedWorks(ref, list, list.length);
   }
   if (grid.dataset.worksMore !== undefined) {
-    // TOPのみ: topPriority の作品を先頭へ（安定ソート。優先同士・それ以外同士は取得順のまま）
-    list = [...list.filter((w) => w.topPriority), ...list.filter((w) => !w.topPriority)];
+    // TOPのみ: worksFirst の作品を先頭へ（安定ソート。優先同士・それ以外同士は取得順のまま）
+    list = [...list.filter((w) => w.worksFirst), ...list.filter((w) => !w.worksFirst)];
   }
   const limit = Number(grid.dataset.worksLimit) || 0;
   if (limit) list = list.slice(0, limit);
