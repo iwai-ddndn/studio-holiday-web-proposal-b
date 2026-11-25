@@ -25,7 +25,10 @@
 /* CMSのみ表示モード: URLに ?cms=only を付けると、microCMSに入っている内容だけで描く。
  * ローカルのフォールバック・ダミー（サンプルメンバー・壁の記事写真・タイトル一致の画像）を使わず、
  * CMSで足りていない所がそのまま見える（見た目の確認用）。画面右下に件数のバッジが出る */
-const CMS_ONLY = /[?&]cms=only\b/.test(location.search);
+// 2026-11-25〜: 常にこのモードで描く（手元のダミー素材・仮原稿・サンプルメンバーでは補わない）。
+// ?cms=only を付けた時は、件数を確かめるバッジも出す（CMS_BADGE）
+const CMS_ONLY = true;
+const CMS_BADGE = /[?&]cms=only\b/.test(location.search);
 window.CMS_ONLY = CMS_ONLY;
 // 先にクラスを付けて、CMS外（data-local）のメンバーが一瞬見えるのを防ぐ
 if (CMS_ONLY) document.documentElement.classList.add('is-cms-only');
@@ -235,15 +238,23 @@ window.stickerLookOf = stickerLookOf;
  * 「#My Project」のようにタグ内に半角スペースを含むことがあるので、半角スペースでは分けない。
  * 先頭の「#」「＃」は付けても付けなくてもよい（表示側で付ける） */
 function splitTags(s) {
-  return String(s || '').split(/\r?\n|　/)
-    .map((t) => t.trim().replace(/^[#＃]+\s*/, ''))
+  // 「A #B」のように半角スペースで続けて書かれた時も、「#」の手前で分ける
+  return String(s || '').split(/\r?\n|　|\s+(?=[#＃])/)
+    .map((t) => t.trim().replace(/^[#＃\s]+/, '').trim())
     .filter(Boolean);
 }
 
 /* 事例のタグ一覧: [クライアント, ...ジャンル（kind を改行・全角スペースで分割）] */
 function workTags(w) {
   if (!w) return [];
-  return [String(w.client || '').trim(), ...splitTags(w.kind)].filter(Boolean);
+  // 同じタグ（クライアント名とジャンルが同じ等）は1つにまとめる
+  const seen = new Set();
+  return [String(w.client || '').trim(), ...splitTags(w.kind)].filter((t) => {
+    const key = t.toLowerCase();
+    if (!t || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 window.workTags = workTags; // FVのステッカー帯・ドロワー（main.js）でも使う
 
@@ -404,6 +415,7 @@ window.workDraftNote = (isDraft) => (isDraft
 window.workBody = async (w) => {
   if (!w) return { html: '', isDraft: false };
   if (w.body) return { html: w.body, isDraft: false };
+  if (CMS_ONLY) return { html: '', isDraft: false }; // 未入稿なら本文なし（仮原稿は出さない）
   return { html: await fetchSampleBody(w.slug), isDraft: true };
 };
 
@@ -449,7 +461,7 @@ async function initWorkDetail() {
     // 未入稿で仮原稿がある事例は、レイアウト確認用にそれを表示する
     (bodyHTML
       ? `<div class="work-body">${window.workDraftNote(isDraft)}${bodyHTML}</div>`
-      : '<p class="work-note">※ 詳細記事の本文はmicroCMSの「本文」入稿待ちです。ここに事例記事がそのまま入ります。（仮）</p>') +
+      : '') +
     workCreditHTML(work);
 
   // 下の一覧は自分自身を外し、同じジャンルの事例を先頭に寄せる
@@ -772,6 +784,7 @@ async function initCmsOnly() {
   document.documentElement.classList.add('is-cms-only');
   const [works, members] = await Promise.all([window.getWorks(), fetchCMS('members')]);
   renderCmsMembers(members || []);
+  if (!CMS_BADGE) return;
 
   const withImg = works.filter((w) => w.image).length;
   const badge = document.createElement('div');

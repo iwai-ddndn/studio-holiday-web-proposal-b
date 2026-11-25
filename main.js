@@ -906,7 +906,7 @@ async function showDrawerBody(work) {
   const gen = ++drawerGen;
   body.innerHTML = '';
   body.hidden = true;
-  note.hidden = true;
+  if (note) note.hidden = true; // 入稿待ちの注記は廃止（古いHTMLに残っていても隠す）
   credit.innerHTML = '';
   grid.innerHTML = '';
   related.hidden = true;
@@ -919,9 +919,8 @@ async function showDrawerBody(work) {
   if (html) {
     body.innerHTML = window.workDraftNote(isDraft) + html; // 自社CMSの入稿HTMLをそのまま流し込む
     body.hidden = false;
-  } else {
-    note.hidden = false;
   }
+  // 本文が未入稿の事例は、本文なしで出す（入稿待ちの注記は出さない）
   credit.innerHTML = extras.credit;
   extras.cards.forEach((card) => grid.appendChild(card));
   related.hidden = false; // 事例ページへのボタンがあるので、関連が0件でも帯は出す
