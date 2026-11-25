@@ -1253,13 +1253,26 @@ async function build({ intro }) {
   // 写真のスポットは互いに離れた場所を選ぶ（足りなければ余りから充当）
   const minPhotoDist = Math.min(worldW, worldH) / 3.5;
   const photos = PHOTOS; // CMSのみ表示でCMSに無ければ空（loadCMSContent）
+  // 写真（FVトピック）はドラッグしないと見えない位置だと「表示されない」と見えるため、
+  // イントロの引きカメラで見える範囲にカードが収まるスポットを優先する（feedback: FVトピック非表示）
+  const introS = Math.max(vw / worldW, 1 / PARAMS.introView);
+  const viewHW = vw / (2 * introS), viewHH = vh / (2 * introS);
+  const inIntroView = (p) => {
+    const w = p.size * 1.15; // 写真カードの幅（下の buildPhoto 呼び出しと同じ）
+    return Math.abs(p.x - worldW / 2) + w / 2 <= viewHW &&
+      Math.abs(p.y - worldH / 2) + w * 0.62 <= viewHH;
+  };
   // 全事例を最低1枚ずつ置けるだけのステッカースポットを確保する（issue #17）。
   // 通常は density=1 の1回で足りる。不足する時だけグリッドを少しずつ細かくして作り直す
   let spots, photoSpots, availableStickerSpots;
   for (let density = 1; ; density *= 1.12) {
     spots = layoutStickers(worldW, worldH, unit, excl, density);
     photoSpots = [];
-    const shuffled = shuffle(spots);
+    // 初期表示範囲内のスポットを先頭に並べる（範囲内で距離制約を満たせなければ範囲外から補う）
+    const shuffled = [
+      ...shuffle(spots.filter(inIntroView)),
+      ...shuffle(spots.filter((p) => !inIntroView(p))),
+    ];
     for (const p of shuffled) {
       if (photoSpots.length >= photos.length) break;
       if (photoSpots.every((q) => Math.hypot(p.x - q.x, p.y - q.y) >= minPhotoDist)) {
