@@ -43,13 +43,6 @@
     const head = $('.sticker-head', hero);
     paste(head);
 
-    const POOL = [
-      'assets/stickers/holiday-kun-thinking.png', 'assets/stickers/works/holiday-cola.png',
-      'assets/stickers/works/monster-illustration.png', 'assets/stickers/works/ebisun.png',
-      'assets/stickers/works/goichi-character.png', 'assets/stickers/works/itomaki-ac-adapter.png',
-      'assets/stickers/works/ichiban-no-oshigoto.png', 'assets/stickers/yappy.png',
-      'assets/stickers/works-pondelion.png',
-    ];
     const SLOTS = [
       { x: 5, y: 16, w: 150, r: -10, s: -0.4 }, { x: 80, y: 12, w: 130, r: 12, s: 0.3 },
       { x: 9, y: 64, w: 120, r: 8, s: 0.5 }, { x: 82, y: 60, w: 150, r: -6, s: -0.3 },
@@ -61,7 +54,7 @@
     const floaters = slots.map((slot) => {
       const img = document.createElement('img');
       img.className = 'pb-floater';
-      img.src = asset(POOL[seed++ % POOL.length]);
+      img.style.visibility = 'hidden'; // 画像が決まって読み込めるまで出さない
       img.alt = '';
       img.setAttribute('aria-hidden', 'true');
       const w = innerWidth < 900 ? slot.w * 0.55 : slot.w;
@@ -70,6 +63,19 @@
       hero.appendChild(img);
       return img;
     });
+    // 四隅の飾りは、microCMS で公開中の事例のステッカー画像から選ぶ（公開を終えた事例は出ない）。
+    // 取得できない・画像のある事例が無い時は、飾りなしのままにする
+    if (floaters.length && window.getWorks) {
+      window.getWorks().then((works) => {
+        const pool = (works || []).filter((w) => w.image);
+        if (!pool.length) return;
+        floaters.forEach((img, i) => {
+          const w = pool[(seed + i) % pool.length];
+          img.addEventListener('load', () => { img.style.visibility = ''; }, { once: true });
+          img.src = w.image.replace(/([?&])w=\d+/, '$1w=360');
+        });
+      }).catch(() => {});
+    }
     gsap.from(floaters, { scale: 0, rotation: -40, duration: 0.9, delay: AFTER_CURTAIN + 0.35, stagger: 0.08, ease: 'back.out(2)' });
     floaters.forEach((img) => {
       const sp = Number(img.dataset.speed);

@@ -100,19 +100,13 @@
       .observe(drawer, { attributes: true, attributeFilter: ['hidden'] });
   }
 
-  /* ---------- ヘッダーの出し入れ・進捗バー ---------- */
-  const header = $('.site-header');
-  const nav = $('.site-nav');
+  /* ---------- 進捗バー ----------
+     ヘッダーはスクロールしても隠さない（お問い合わせボタンを常に出しておくため） */
   const bar = $('.pb-progress i');
-  let lastY = scrollY;
   const onScroll = () => {
     const y = scrollY;
     const max = html.scrollHeight - innerHeight;
     if (bar) bar.style.transform = `scaleX(${max > 0 ? y / max : 0})`;
-    if (header && !nav?.classList.contains('is-open') && Math.abs(y - lastY) > 4) {
-      header.classList.toggle('is-away', y > lastY && y > innerHeight * 0.9);
-      lastY = y;
-    }
   };
   addEventListener('scroll', onScroll, { passive: true });
   onScroll();

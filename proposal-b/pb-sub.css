@@ -465,8 +465,15 @@
 }
 
 @media (max-width: 640px) {
-  .pb-sub .works-board .works-grid { grid-template-columns: 1fr; }
+  /* スマホ: 事例カードは左右2列（1列だとカードが大きく、スクロールが長くなるため） */
+  .pb-sub .works-board .works-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .pb-sub.works-page .works-board .works-grid > :nth-child(n) { margin-top: 0; }
+  .pb-sub .works-board .work-card { aspect-ratio: auto; border-radius: 16px; }
+  .pb-sub .works-board .work-card-visual { padding: 16px; }
+  .pb-sub .works-board .work-card-body { gap: 8px; padding: 12px 12px 14px; }
+  .pb-sub .works-board .work-card-title { font-size: 14px; }
+  .pb-sub .works-board .work-card-tags { gap: 4px 6px; }
+  .pb-sub .works-board .work-card-tags span { padding: 1px 5px; font-size: 10px; }
   .pb-hero-scroll { display: none; }
   .pb-sub .biz-link { aspect-ratio: 4 / 3; }
   .pb-sub .biz-link svg { width: 22px; height: 22px; padding: 14px; }

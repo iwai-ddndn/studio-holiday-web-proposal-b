@@ -102,7 +102,6 @@ html.pb-js { scroll-behavior: auto; } /* Lenis が滑らかにする */
 
 /* ---------- ヘッダー: 下スクロールで隠れ、上スクロールで戻る ---------- */
 .pb .site-header { transition: transform 0.55s var(--pb-ease), filter 0.3s ease; }
-.pb .site-header.is-away { transform: translateY(-160%); }
 .pb .site-nav a { text-decoration: none; }
 .pb .site-nav a:hover { opacity: 1; }
 .pb-roll { display: inline-block; height: 1.3em; overflow: hidden; line-height: 1.3em; vertical-align: top; }
@@ -755,9 +754,16 @@ a:hover > .pb-roll > span { transform: translateY(-1.3em); }
   .pb-scroll-badge { display: none; }
   .pb-br-sp { display: inline; }
   .pb-about-title { font-size: clamp(24px, 7vw, 36px); }
-  .pb .pb-works-grid { grid-template-columns: 1fr; }
+  /* スマホ: 事例カードは左右2列（1列だとカードが大きく、スクロールが長くなるため） */
+  .pb .pb-works-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .pb .pb-works-grid > :nth-child(n) { margin-top: 0; }
-  .pb .pb-works-more { width: 240px; }
+  .pb .pb-works-grid .work-card { border-radius: 16px; }
+  .pb .pb-works-grid .work-card-visual { padding: 16px; }
+  .pb .pb-works-grid .work-card-body { gap: 8px; padding: 12px 12px 14px; }
+  .pb .pb-works-grid .work-card-title { font-size: 14px; }
+  .pb .pb-works-grid .work-card-tags { gap: 4px 6px; }
+  .pb .pb-works-grid .work-card-tags span { padding: 1px 5px; font-size: 10px; }
+  .pb .pb-works-more { width: 100%; }
   .pb-member { width: 250px; height: 260px; }
   .pb-member:nth-child(2n) { translate: none; }
   .pb-member-photo { width: 240px; height: 240px; }
