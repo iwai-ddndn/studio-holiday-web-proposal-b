@@ -323,6 +323,10 @@ window.workDrawerExtras = async (work) => {
   return { credit: workCreditHTML(self), cards: window.relatedWorks(self, all, 3).map(workCard) };
 };
 
+/* worksFirst（TOPのWORKs一覧で先頭に表示）の作品を先頭へ並べる。
+ * 安定ソート: 優先同士・それ以外同士は取得順のまま。TOPのWORKsグリッドとフッターで共通 */
+const sortWorksFirst = (list) => [...list.filter((w) => w.worksFirst), ...list.filter((w) => !w.worksFirst)];
+
 /* grid の data属性:
  *   data-works-limit    … 表示件数の上限（未指定なら全件）
  *   data-works-more     … 先頭 data-works-initial 件のあとに置く「全て見る」リンク（TOP用・WORKS一覧へ）
@@ -337,8 +341,8 @@ function renderWorksGrid(grid, works) {
     list = window.relatedWorks(ref, list, list.length);
   }
   if (grid.dataset.worksMore !== undefined) {
-    // TOPのみ: worksFirst の作品を先頭へ（安定ソート。優先同士・それ以外同士は取得順のまま）
-    list = [...list.filter((w) => w.worksFirst), ...list.filter((w) => !w.worksFirst)];
+    // TOPのみ: worksFirst の作品を先頭へ
+    list = sortWorksFirst(list);
   }
   const limit = Number(grid.dataset.worksLimit) || 0;
   if (limit) list = list.slice(0, limit);
@@ -511,7 +515,8 @@ async function initFooterWorks() {
   const works = await window.getWorks();
   if (!works.length) return; // 取得できなければHTMLの仮リストのまま
   box.innerHTML = '';
-  works.slice(0, 5).forEach((w) => {
+  // TOPのWORKsグリッドと同じく worksFirst の作品を先頭にしてから5件（フォールバック時も同じ）
+  sortWorksFirst(works).slice(0, 5).forEach((w) => {
     const a = document.createElement('a');
     a.href = window.workURL(w);
     a.textContent = w.title;
