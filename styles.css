@@ -5,7 +5,7 @@
   --surface-2: #f0f0f0;
   --ink: #1a1a1a;
   --white: #ffffff;
-  --lime: #d5f409;
+  --lime: #bbff38;
   --orange: #f57424;
   --blue: #3b73f8;
   --green: #36f718;
@@ -1023,8 +1023,8 @@ body.drawer-open { overflow: hidden; }
 
 :root {
   /* Figmaのデザイントークン（lime / bk-80 / bk-50）。
-   * FVで使っている旧 --lime(#d5f409) とは別値なので触らない */
-  --fig-lime: #dfff0f;
+   * 2026-11-26: メインカラーを #bbff38 に変更。FVの --lime も同じ値にそろえた */
+  --fig-lime: #bbff38;
   --bk-80: #666666;
   --bk-50: #cccccc;
 }

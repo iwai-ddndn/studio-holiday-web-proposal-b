@@ -1465,7 +1465,7 @@ function initTunePanel() {
     '<label>テクスチャの細かさ<output id="tune-fvTexSize"></output><input type="range" data-key="fvTexSize" min="8" max="64" step="1" /></label>' +
     '<label>台紙（プレビュー）<select data-key="stickerBase">' +
       '<option value="">CMS設定どおり</option><option value="#ffffff">白</option>' +
-      '<option value="#d5f409">ライム</option><option value="#1a1a1a">黒</option><option value="none">フチなし</option>' +
+      '<option value="#bbff38">ライム</option><option value="#1a1a1a">黒</option><option value="none">フチなし</option>' +
     '</select></label>' +
     '<label>素材（プレビュー）<select data-key="stickerFinish">' +
       '<option value="">CMS設定どおり</option><option value="normal">通常</option>' +

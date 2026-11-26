@@ -1,7 +1,7 @@
 /* ===== STUDIO HOLIDAY — デザイン案B（モーション強化版） =====
  * styles.css の上に重ねて読む。FV（壁）・ドロワー・事例カードの部品は styles.css のものを使い、
  * FV以下のセクションは pb- で始まるクラスで組み直している。
- * カラー・画像は本番と同じ（ink #1a1a1a / lime #dfff0f / 白 / ハーフトーン）。
+ * カラー・画像は本番と同じ（ink #1a1a1a / lime #bbff38 / 白 / ハーフトーン）。
  * html.pb-js … JSが動く環境。html.pb-motion … GSAPが読めてモーションが有効な時だけ付く。
  */
 
@@ -92,7 +92,7 @@ html.pb-js { scroll-behavior: auto; } /* Lenis が滑らかにする */
   .pb-cursor.is-big .pb-cursor-label { opacity: 1; transform: none; }
   .pb-cursor.is-view { background: var(--ink); }
   .pb-cursor.is-view .pb-cursor-label { color: var(--fig-lime); }
-  .pb-cursor.is-link { width: 44px; height: 44px; margin: -22px 0 0 -22px; background: #dfff0f99; }
+  .pb-cursor.is-link { width: 44px; height: 44px; margin: -22px 0 0 -22px; background: color-mix(in srgb, var(--fig-lime) 60%, transparent); }
   .pb-cursor.is-hidden { opacity: 0; }
 }
 
@@ -397,7 +397,7 @@ a:hover > .pb-roll > span { transform: translateY(-1.3em); }
   font-size: clamp(120px, 22vw, 340px);
   line-height: 1;
   color: transparent;
-  -webkit-text-stroke: 1.5px #dfff0f55;
+  -webkit-text-stroke: 1.5px color-mix(in srgb, var(--fig-lime) 33%, transparent);
 }
 .pb-contact-inner { position: relative; display: flex; flex-direction: column; align-items: center; }
 .pb-sticker--contact { width: min(357px, 70vw); rotate: 4deg; }

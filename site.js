@@ -206,7 +206,7 @@ window.isFlagOn = isFlagOn;
  * 表示名（白/ライム…）と英語キー（white/lime…）のどちらでも可。 */
 const STICKER_BASES = {
   白: '#ffffff', white: '#ffffff',
-  ライム: '#d5f409', lime: '#d5f409',
+  ライム: '#bbff38', lime: '#bbff38',
   黒: '#1a1a1a', black: '#1a1a1a',
   フチなし: 'none', none: 'none',
 };
